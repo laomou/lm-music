@@ -25,8 +25,19 @@ export type Playlist = {
 }
 
 export type JellyfinSession = {
+  provider: 'jellyfin'
   serverUrl: string
   accessToken: string
   userId: string
   username: string
 }
+
+export type SubsonicSession = {
+  provider: 'subsonic'
+  serverUrl: string
+  username: string
+  password: string
+}
+
+export type MusicSession = JellyfinSession | SubsonicSession
+export type MusicProviderType = MusicSession['provider']

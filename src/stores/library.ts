@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { JellyfinClient } from '@/services/jellyfin/client'
+import { NavidromeClient } from '@/services/navidrome/client'
 import { getLibrary, getDownloadedTracks, saveLibrary, serverCacheId } from '@/services/offline-storage'
 import type { Playlist } from '@/types/music'
 import { useAuthStore } from './auth'
@@ -14,7 +15,7 @@ export const useLibraryStore = defineStore('library', {
       this.loading = true
       this.error = ''
       const auth = useAuthStore()
-      const cacheId = serverCacheId(auth.session?.serverUrl, auth.session?.userId)
+      const cacheId = serverCacheId(auth.session?.serverUrl, auth.session?.provider === 'jellyfin' ? auth.session.userId : auth.session?.username, auth.session?.provider)
       try {
         const cached = await getLibrary(cacheId)
         if (cached?.playlists.length) {
@@ -34,7 +35,9 @@ export const useLibraryStore = defineStore('library', {
             .filter((playlist) => playlist.tracks.length > 0)
           return
         }
-        const playlists = await new JellyfinClient(auth.session).getPlaylists()
+        const playlists = auth.session.provider === 'jellyfin'
+          ? await new JellyfinClient(auth.session).getPlaylists()
+          : await new NavidromeClient(auth.session).getPlaylists()
         this.playlists = playlists
         this.source = 'network'
         await saveLibrary(cacheId, playlists)
@@ -50,8 +53,10 @@ export const useLibraryStore = defineStore('library', {
       if (!auth.session || !navigator.onLine) return
       const track = this.playlists.flatMap((playlist) => playlist.tracks).find((item) => item.id === trackId)
       if (track && !track.lyrics.length) {
-        track.lyrics = await new JellyfinClient(auth.session).getLyrics(trackId)
-        await saveLibrary(serverCacheId(auth.session.serverUrl, auth.session.userId), this.playlists)
+        track.lyrics = auth.session.provider === 'jellyfin'
+          ? await new JellyfinClient(auth.session).getLyrics(trackId)
+          : await new NavidromeClient(auth.session).getLyrics(trackId)
+        await saveLibrary(serverCacheId(auth.session.serverUrl, auth.session.provider === 'jellyfin' ? auth.session.userId : auth.session.username, auth.session.provider), this.playlists)
       }
     },
   },

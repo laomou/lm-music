@@ -29,7 +29,7 @@ export const useDownloadsStore = defineStore('downloads', {
   getters: {
     serverId: () => {
       const auth = useAuthStore()
-      return serverCacheId(auth.session?.serverUrl, auth.session?.userId)
+      return serverCacheId(auth.session?.serverUrl, auth.session?.provider === 'jellyfin' ? auth.session.userId : auth.session?.username, auth.session?.provider)
     },
     isDownloaded: (state) => (trackId: string) => state.tracks.some((item) => item.trackId === trackId),
     taskFor: (state) => (id: string) => state.tasks.find((task) => task.id === id),

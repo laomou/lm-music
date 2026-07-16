@@ -29,7 +29,7 @@ export class JellyfinClient {
     })
     if (!response.ok) throw new Error('无法登录 Jellyfin，请检查服务器地址、用户名和密码。')
     const data = await response.json() as AuthResponse
-    return { serverUrl: url, accessToken: data.AccessToken, userId: data.User.Id, username: data.User.Name }
+    return { provider: 'jellyfin', serverUrl: url, accessToken: data.AccessToken, userId: data.User.Id, username: data.User.Name }
   }
 
   private async request<T>(path: string): Promise<T> {

@@ -1,21 +1,21 @@
 import { defineStore } from 'pinia'
-import type { JellyfinSession } from '@/types/music'
+import type { MusicSession } from '@/types/music'
 
-const STORAGE_KEY = 'lm-music-jellyfin-session'
+const STORAGE_KEY = 'lm-music-session'
 
-const loadSession = (): JellyfinSession | null => {
+const loadSession = (): MusicSession | null => {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as JellyfinSession | null
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as MusicSession | null
   } catch {
     return null
   }
 }
 
 export const useAuthStore = defineStore('auth', {
-  state: () => ({ session: loadSession() as JellyfinSession | null }),
+  state: () => ({ session: loadSession() as MusicSession | null }),
   getters: { isConnected: (state) => Boolean(state.session) },
   actions: {
-    saveSession(session: JellyfinSession) {
+    saveSession(session: MusicSession) {
       this.session = session
       localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
     },

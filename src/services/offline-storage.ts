@@ -78,8 +78,8 @@ async function allRecords<T>(storeName: string): Promise<T[]> {
   })
 }
 
-export function serverCacheId(serverUrl?: string, userId?: string) {
-  return serverUrl && userId ? `${serverUrl.replace(/\/$/, '')}::${userId}` : 'demo'
+export function serverCacheId(serverUrl?: string, userId?: string, provider?: string) {
+  return serverUrl && userId ? `${provider ?? 'jellyfin'}::${serverUrl.replace(/\/$/, '')}::${userId}` : 'offline'
 }
 
 export async function saveLibrary(serverId: string, playlists: Playlist[]) {
