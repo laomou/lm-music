@@ -29,7 +29,7 @@ export const router = createRouter({
 
 router.beforeEach((to) => {
   const auth = useAuthStore()
-  if (to.path !== '/connect' && !auth.isConnected && to.path !== '/playlists') {
+  if (to.path !== '/connect' && !auth.isConnected && !['/playlists', '/downloads'].includes(to.path)) {
     return '/connect'
   }
 })

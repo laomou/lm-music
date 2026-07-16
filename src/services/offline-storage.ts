@@ -153,7 +153,7 @@ export async function downloadTrack(serverId: string, track: Track, playlistId?:
 
 export async function getDownloadedTracks(serverId: string): Promise<DownloadSummary> {
   const tracks = (await allRecords<DownloadedTrack>(DOWNLOAD_STORE))
-    .filter((item) => item.serverId === serverId)
+    .filter((item) => serverId === 'offline' || item.serverId === serverId)
     .sort((left, right) => right.downloadedAt - left.downloadedAt)
   return { tracks, totalBytes: tracks.reduce((total, item) => total + item.bytes, 0) }
 }
@@ -168,7 +168,7 @@ export async function deleteDownloadedTrack(id: string) {
 }
 
 export async function clearServerOfflineData(serverId: string, includeMetadata = true) {
-  const tracks = (await allRecords<DownloadedTrack>(DOWNLOAD_STORE)).filter((item) => item.serverId === serverId)
+  const tracks = (await allRecords<DownloadedTrack>(DOWNLOAD_STORE)).filter((item) => serverId === 'offline' || item.serverId === serverId)
   await Promise.all(tracks.map((item) => deleteDownloadedTrack(item.id)))
   if (includeMetadata) await deleteRecord(LIBRARY_STORE, serverId)
 }
