@@ -6,7 +6,7 @@ const app = useAppStore()
 
 <template>
   <aside v-if="app.updateAvailable" class="app-notice" role="status">
-    <span><strong>发现新版本</strong><small>更新不会中断当前播放，确认后将重新加载应用。</small></span>
+    <span><strong>发现新版本</strong><small>新版本已下载。点击更新将重新加载应用，当前播放会停止。</small></span>
     <div><button class="notice-muted" @click="app.updateAvailable = false">稍后</button><button class="notice-button" @click="app.applyUpdate()">更新</button></div>
   </aside>
   <aside v-else-if="app.offlineReady" class="app-notice compact" role="status">

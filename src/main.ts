@@ -26,3 +26,12 @@ const updateServiceWorker = registerSW({
   onRegisterError: () => { appStore.serviceWorkerError = '离线功能暂不可用，请检查浏览器设置。' },
 })
 appStore.setUpdateHandler(updateServiceWorker)
+appStore.setUpdateChecker(updateServiceWorker.update)
+
+// Check periodically and whenever the user returns to the app. A running PWA
+// otherwise may keep an older service worker for a long listening session.
+const checkForUpdate = () => appStore.checkUpdate().catch(() => undefined)
+window.setInterval(checkForUpdate, 60 * 60 * 1000)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') checkForUpdate()
+})

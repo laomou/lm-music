@@ -7,6 +7,7 @@ export const useAppStore = defineStore('app', {
     offlineReady: false,
     serviceWorkerError: '',
     updateServiceWorker: null as null | ((reloadPage?: boolean) => Promise<void>),
+    checkForUpdate: null as null | (() => Promise<void>),
   }),
   getters: {
     canInstall: (state) => Boolean(state.deferredInstallPrompt),
@@ -27,6 +28,12 @@ export const useAppStore = defineStore('app', {
     },
     setUpdateHandler(handler: (reloadPage?: boolean) => Promise<void>) {
       this.updateServiceWorker = handler
+    },
+    setUpdateChecker(checker: () => Promise<void>) {
+      this.checkForUpdate = checker
+    },
+    async checkUpdate() {
+      await this.checkForUpdate?.()
     },
     async applyUpdate() {
       if (!this.updateServiceWorker) return

@@ -6,7 +6,10 @@ declare module 'virtual:pwa-register' {
     onNeedRefresh?: () => void
     onOfflineReady?: () => void
     onRegisterError?: (error: unknown) => void
-  }): (reloadPage?: boolean) => Promise<void>
+  }): {
+    (reloadPage?: boolean): Promise<void>
+    update: () => Promise<void>
+  }
 }
 
 interface BeforeInstallPromptEvent extends Event {
