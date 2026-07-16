@@ -72,6 +72,7 @@ export const useDownloadsStore = defineStore('downloads', {
       }
     },
     async downloadSingle(track: Track, playlistId?: string) {
+      this.error = ''
       const auth = useAuthStore()
       if (track.allowOfflineDownload === false || (auth.session && !getProviderForSession(auth.session).supportsOfflineDownload)) {
         this.error = t('error.streamingOnly')
@@ -105,6 +106,7 @@ export const useDownloadsStore = defineStore('downloads', {
       }
     },
     async downloadPlaylist(playlist: Playlist) {
+      this.error = ''
       const auth = useAuthStore()
       if (playlist.tracks.some((track) => track.allowOfflineDownload === false) || (auth.session && !getProviderForSession(auth.session).supportsOfflineDownload)) {
         this.error = t('error.streamingOnly')
@@ -151,15 +153,18 @@ export const useDownloadsStore = defineStore('downloads', {
       this.tasks = this.tasks.filter((task) => task.id !== taskId)
     },
     async retry(task: DownloadTask, source: { playlist?: Playlist; track?: Track }) {
+      this.error = ''
       if (task.id.startsWith('playlist:') && source.playlist) await this.downloadPlaylist(source.playlist)
       else if (task.id.startsWith('track:') && source.track) await this.downloadSingle(source.track, source.playlist?.id)
       else this.error = t('error.retrySourceMissing')
     },
     async remove(track: DownloadedTrack) {
+      this.error = ''
       await deleteDownloadedTrack(track.id)
       await this.refresh()
     },
     async clearAll() {
+      this.error = ''
       this.controllers.forEach((controller) => controller.abort())
       this.controllers.clear()
       this.tasks = this.tasks.map((task) => task.status === 'downloading' ? { ...task, status: 'cancelled' } : task)
