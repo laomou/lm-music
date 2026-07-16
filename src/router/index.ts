@@ -21,6 +21,9 @@ export const router = createRouter({
     { path: '/downloads', component: DownloadsView },
     { path: '/:pathMatch(.*)*', redirect: '/playlists' },
   ],
+  scrollBehavior(_to, _from, savedPosition) {
+    return savedPosition ?? { top: 0, behavior: 'smooth' }
+  },
 })
 
 router.beforeEach((to) => {
