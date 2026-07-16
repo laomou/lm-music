@@ -28,7 +28,7 @@ function seek(event: Event) {
     <div class="player-layout">
       <div class="player-main">
         <CoverImage class="now-cover" :src="track.coverUrl" alt="" loading="eager" />
-        <div class="now-track"><div class="now-track-copy"><h1 :title="track.title">{{ track.title }}</h1><p :title="track.artist">{{ track.artist }}</p></div><span class="heart-button" aria-hidden="true"><Heart /></span></div>
+        <div class="now-track"><div class="now-track-copy"><h1 :title="track.title">{{ track.title }}</h1><p :title="track.artist">{{ track.artist }}</p></div><button type="button" class="heart-button" :class="{ active: player.isFavorite(track.id) }" :aria-label="player.isFavorite(track.id) ? t('player.unlike') : t('player.like')" :aria-pressed="player.isFavorite(track.id)" @click="player.toggleFavorite(track)"><Heart :fill="player.isFavorite(track.id) ? 'currentColor' : 'none'" /></button></div>
         <div v-if="player.error" class="playback-error" role="alert"><span>{{ player.error }}</span><button type="button" @click="player.togglePlayback()">{{ t('common.retry') }}</button></div>
         <div class="progress-wrap"><input :value="player.currentTime" type="range" min="0" :max="player.duration || track.duration" step="0.1" :aria-label="t('player.nowPlaying')" :aria-valuetext="`${formatDuration(player.currentTime)} / ${formatDuration(player.duration || track.duration)}`" @input="seek" /><div><time>{{ formatDuration(player.currentTime) }}</time><time>{{ formatDuration(player.duration || track.duration) }}</time></div></div>
         <PlayerControls />

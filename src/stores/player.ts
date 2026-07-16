@@ -13,9 +13,11 @@ type PersistedPlayer = {
   shuffle: boolean
   repeatMode: RepeatMode
   recentTracks?: RecentTrack[]
+  favoriteTracks?: FavoriteTrack[]
 }
 
 export type RecentTrack = Track & { playedAt: number }
+export type FavoriteTrack = Track & { favoritedAt: number }
 
 const restore = (): PersistedPlayer => {
   try {
@@ -41,6 +43,7 @@ export const usePlayerStore = defineStore('player', {
       shuffle: saved.shuffle ?? false,
       repeatMode: saved.repeatMode ?? 'off' as RepeatMode,
       recentTracks: saved.recentTracks ?? [] as RecentTrack[],
+      favoriteTracks: saved.favoriteTracks ?? [] as FavoriteTrack[],
       error: '',
     }
   },
@@ -61,6 +64,7 @@ export const usePlayerStore = defineStore('player', {
         shuffle: this.shuffle,
         repeatMode: this.repeatMode,
         recentTracks: this.recentTracks,
+        favoriteTracks: this.favoriteTracks,
       }))
     },
     restorePlayback() {
@@ -83,6 +87,15 @@ export const usePlayerStore = defineStore('player', {
     },
     clearRecentTracks() {
       this.recentTracks = []
+      this.persist()
+    },
+    isFavorite(trackId: string) {
+      return this.favoriteTracks.some((item) => item.id === trackId)
+    },
+    toggleFavorite(track: Track) {
+      this.favoriteTracks = this.isFavorite(track.id)
+        ? this.favoriteTracks.filter((item) => item.id !== track.id)
+        : [{ ...track, favoritedAt: Date.now() }, ...this.favoriteTracks]
       this.persist()
     },
     play(track: Track, queue: Track[], startTime = 0) {

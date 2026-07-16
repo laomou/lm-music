@@ -21,6 +21,11 @@ const recentTracks = computed(() => {
   const tracks = player.recentTracks.slice(0, 6)
   return query ? tracks.filter((track) => `${track.title} ${track.artist}`.toLowerCase().includes(query)) : tracks
 })
+const favoriteTracks = computed(() => {
+  const query = normalizedSearch.value
+  const tracks = player.favoriteTracks
+  return query ? tracks.filter((track) => `${track.title} ${track.artist}`.toLowerCase().includes(query)) : tracks
+})
 const playlists = computed(() => {
   const query = normalizedSearch.value
   if (!query) return library.playlists
@@ -36,7 +41,7 @@ function resume() {
 }
 
 function playRecent(trackId: string) {
-  const track = player.recentTracks.find((item) => item.id === trackId)
+  const track = [...player.recentTracks, ...player.favoriteTracks].find((item) => item.id === trackId)
   if (!track) return
   const playlist = library.playlists.find((item) => item.tracks.some((item) => item.id === track.id))
   player.play(track, playlist?.tracks ?? [track])
@@ -58,6 +63,13 @@ function clearRecent() {
     </button>
 
     <label class="library-search"><span>{{ t('library.searchPlaceholder') }}</span><input v-model="search" type="search" :placeholder="t('library.searchPlaceholder')" /></label>
+
+    <div v-if="favoriteTracks.length" class="section-heading"><h2>{{ t('library.favorites') }}</h2></div>
+    <div v-if="favoriteTracks.length" class="recent-tracks">
+      <button type="button" v-for="track in favoriteTracks" :key="track.id" class="recent-track" :aria-current="player.currentTrack?.id === track.id ? 'true' : undefined" :aria-label="player.currentTrack?.id === track.id ? t('player.currentlyPlaying', { title: track.title }) : t('playlist.playTrack', { title: track.title })" @click="playRecent(track.id)">
+        <CoverImage :src="track.coverUrl" alt="" /><span><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span><Play :size="16" fill="currentColor" />
+      </button>
+    </div>
 
     <div v-if="recentTracks.length" class="section-heading"><h2>{{ t('library.recent') }}</h2><button type="button" class="text-button" @click="clearRecent">{{ t('library.clearRecent') }}</button></div>
     <div v-if="recentTracks.length" class="recent-tracks">
