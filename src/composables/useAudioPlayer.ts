@@ -6,7 +6,12 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
   const persistPlayback = () => player.persist()
 
   async function loadSource() {
-    if (!audio.value || !player.currentTrack) return
+    if (!audio.value) return
+    if (!player.currentTrack) {
+      audio.value.removeAttribute('src')
+      audio.value.load()
+      return
+    }
 
     // Keep this synchronous: a song selection is a user gesture, and browsers
     // may reject playback if an async cache lookup happens before audio.play().

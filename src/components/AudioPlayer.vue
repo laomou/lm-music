@@ -14,6 +14,10 @@ const { onTimeUpdate, onLoadedMetadata } = useAudioPlayer(audio)
 useMediaSession()
 onMounted(() => player.restorePlayback())
 
+auth.$subscribe(() => {
+  if (!auth.session) player.clearPlayback()
+})
+
 function handleError() {
   const isAudius = auth.session?.provider === 'audius'
   const message = isAudius

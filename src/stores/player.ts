@@ -188,5 +188,15 @@ export const usePlayerStore = defineStore('player', {
     clearError() {
       this.error = ''
     },
+    clearPlayback() {
+      this.currentTrack = null
+      this.queue = []
+      this.currentIndex = -1
+      this.currentTime = 0
+      this.duration = 0
+      this.isPlaying = false
+      this.error = ''
+      this.persist()
+    },
   },
 })
