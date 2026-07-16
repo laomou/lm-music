@@ -104,7 +104,7 @@ export const useDownloadsStore = defineStore('downloads', {
       try {
         await requestPersistentStorage()
         for (const track of playlist.tracks) {
-          if (controller.signal.aborted) throw new DOMException('下载已取消', 'AbortError')
+          if (controller.signal.aborted) throw new DOMException(t('error.downloadCancelled'), 'AbortError')
           task.receivedBytes = 0
           task.totalBytes = 0
           if (!this.isDownloaded(track.id)) {
