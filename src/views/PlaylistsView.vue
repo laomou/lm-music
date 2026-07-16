@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useLibraryStore } from '@/stores/library'
 import { usePlayerStore } from '@/stores/player'
 import { getProviderForSession } from '@/services/providers'
+import { Download, Play, Settings } from '@lucide/vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -23,11 +24,11 @@ function resume() {
 
 <template>
   <section class="page playlists-page">
-    <header class="topbar"><div><p class="eyebrow">LM MUSIC</p><h1>你的歌单</h1></div><div class="header-actions"><button class="settings-button" aria-label="离线内容" @click="openDownloads">↓</button><button class="settings-button" aria-label="设置" @click="router.push('/settings')">⚙</button></div></header>
+    <header class="topbar"><div><p class="eyebrow">LM MUSIC</p><h1>你的歌单</h1></div><div class="header-actions"><button class="settings-button" aria-label="离线内容" @click="openDownloads"><Download /></button><button class="settings-button" aria-label="设置" @click="router.push('/settings')"><Settings /></button></div></header>
 
     <button v-if="player.currentTrack" class="resume-card" @click="resume">
       <img :src="player.currentTrack.coverUrl" alt="" />
-      <span><small>继续收听</small><strong>{{ player.currentTrack.title }}</strong><em>{{ player.currentTrack.artist }}</em></span><b>▶</b>
+      <span><small>继续收听</small><strong>{{ player.currentTrack.title }}</strong><em>{{ player.currentTrack.artist }}</em></span><b><Play :size="15" fill="currentColor" /></b>
     </button>
 
     <div class="section-heading"><h2>{{ auth.isConnected ? `${providerLabel}${auth.session?.provider === 'audius' ? ' 热门' : ''}歌单` : '已下载歌单' }}</h2><span v-if="library.loading">同步中…</span></div>

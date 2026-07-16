@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import { getProviderForSession } from '@/services/providers'
 import { computed } from 'vue'
+import { ArrowLeft } from '@lucide/vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -18,7 +19,7 @@ function disconnect() {
 
 <template>
   <section class="page settings-page">
-    <button class="back-button" @click="router.push('/playlists')">← 返回歌单</button>
+    <button class="back-button" @click="router.push('/playlists')"><ArrowLeft :size="18" /> 返回歌单</button>
     <p class="eyebrow">设置</p><h1>你的播放器</h1>
     <div class="settings-card"><small>{{ provider?.label?.toUpperCase() || '音乐来源' }} {{ auth.session?.provider === 'audius' ? '' : '服务器' }}</small><strong>{{ auth.session?.provider === 'audius' ? '公开音乐目录' : auth.session?.serverUrl || '尚未连接' }}</strong><span>{{ provider ? `${provider.subtitle}${provider.supportsOfflineDownload ? '，支持离线下载。' : '，仅支持在线播放。'}` : '离线内容仅限此前已下载的歌曲' }}</span></div>
     <button class="settings-card settings-button-card" @click="router.push('/connect')"><small>音乐来源</small><strong>切换音乐来源</strong><span>改用 Jellyfin、Navidrome / OpenSubsonic，或 Audius 公开音乐。</span></button>

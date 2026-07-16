@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { getMusicProvider, musicProviders } from '@/services/providers'
 import { useAuthStore } from '@/stores/auth'
 import type { MusicProviderType } from '@/types/music'
+import { ArrowLeft, Music2 } from '@lucide/vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -32,8 +33,8 @@ async function connect() {
 
 <template>
   <section class="connect-page">
-    <button v-if="auth.isConnected" class="back-button connect-back" @click="router.push('/playlists')">← 返回音乐库</button>
-    <div class="brand-mark">♪</div>
+    <button v-if="auth.isConnected" class="back-button connect-back" @click="router.push('/playlists')"><ArrowLeft :size="18" /> 返回音乐库</button>
+    <div class="brand-mark"><Music2 /></div>
     <p class="eyebrow">LM MUSIC</p>
     <h1>连接你的<br />音乐库</h1>
     <p class="muted">连接你的 Jellyfin 或 Navidrome 音乐库，或直接浏览 Audius 的公开音乐。</p>

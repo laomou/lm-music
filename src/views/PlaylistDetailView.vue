@@ -5,6 +5,7 @@ import { useLibraryStore } from '@/stores/library'
 import { usePlayerStore } from '@/stores/player'
 import { useDownloadsStore } from '@/stores/downloads'
 import { formatDuration } from '@/utils/formatDuration'
+import { ArrowLeft, Check, Download, Play, Radio } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -32,13 +33,13 @@ function play(index: number) {
 
 <template>
   <section v-if="playlist" class="page playlist-detail">
-    <button class="back-button" @click="router.push('/playlists')">← 返回歌单</button>
+    <button class="back-button" @click="router.push('/playlists')"><ArrowLeft :size="18" /> 返回歌单</button>
     <div class="playlist-hero"><img :src="playlist.coverUrl" alt="" /><div><p class="eyebrow">歌单</p><h1>{{ playlist.name }}</h1><p>{{ playlist.description || `${playlist.tracks.length} 首歌曲` }}</p><span>{{ playlist.tracks.length }} 首 · {{ formatDuration(playlist.tracks.reduce((total, track) => total + track.duration, 0)) }}</span></div></div>
-    <div class="playlist-actions"><button class="primary-button" @click="play(0)">▶ 播放全部</button><button v-if="canDownload" class="secondary-button" :disabled="downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading'" @click="download">{{ downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading' ? `下载中 ${downloads.taskFor(`playlist:${playlist.id}`)?.completed}/${playlist.tracks.length}` : '↓ 下载歌单' }}</button><span v-else class="online-only">仅支持在线播放</span></div>
+    <div class="playlist-actions"><button class="primary-button" @click="play(0)"><Play :size="17" fill="currentColor" /> 播放全部</button><button v-if="canDownload" class="secondary-button" :disabled="downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading'" @click="download"><Download :size="16" /> {{ downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading' ? `下载中 ${downloads.taskFor(`playlist:${playlist.id}`)?.completed}/${playlist.tracks.length}` : '下载歌单' }}</button><span v-else class="online-only">仅支持在线播放</span></div>
     <div class="track-list">
       <button v-for="(track, index) in playlist.tracks" :key="track.id" class="track-row" :class="{ current: player.currentTrack?.id === track.id }" @click="play(index)">
-        <span class="track-number">{{ player.currentTrack?.id === track.id && player.isPlaying ? '♫' : String(index + 1).padStart(2, '0') }}</span>
-        <img :src="track.coverUrl" alt="" /><span class="track-copy"><strong>{{ track.title }}</strong><small>{{ track.artist }}</small></span><span class="track-actions"><button v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="`下载 ${track.title}`" :disabled="downloads.isDownloaded(track.id)" @click.stop="downloads.downloadSingle(track, playlist.id)">{{ downloads.isDownloaded(track.id) ? '✓' : '↓' }}</button><time>{{ formatDuration(track.duration) }}</time></span>
+        <span class="track-number"><Radio v-if="player.currentTrack?.id === track.id && player.isPlaying" :size="15" />{{ player.currentTrack?.id === track.id && player.isPlaying ? '' : String(index + 1).padStart(2, '0') }}</span>
+        <img :src="track.coverUrl" alt="" /><span class="track-copy"><strong>{{ track.title }}</strong><small>{{ track.artist }}</small></span><span class="track-actions"><button v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="`下载 ${track.title}`" :disabled="downloads.isDownloaded(track.id)" @click.stop="downloads.downloadSingle(track, playlist.id)"><Check v-if="downloads.isDownloaded(track.id)" :size="16" /><Download v-else :size="16" /></button><time>{{ formatDuration(track.duration) }}</time></span>
       </button>
     </div>
   </section>

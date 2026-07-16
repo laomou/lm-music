@@ -6,6 +6,7 @@ import SyncedLyrics from '@/components/SyncedLyrics.vue'
 import { useLibraryStore } from '@/stores/library'
 import { usePlayerStore } from '@/stores/player'
 import { formatDuration } from '@/utils/formatDuration'
+import { ChevronDown, Heart, Volume2, VolumeX } from '@lucide/vue'
 
 const router = useRouter()
 const player = usePlayerStore()
@@ -21,15 +22,15 @@ function seek(event: Event) {
 
 <template>
   <section v-if="track" class="page now-playing">
-    <header class="now-header"><button class="back-button" aria-label="返回歌单" @click="router.push('/playlists')">⌄</button><p>正在播放</p><span></span></header>
+    <header class="now-header"><button class="back-button" aria-label="返回歌单" @click="router.push('/playlists')"><ChevronDown /></button><p>正在播放</p><span></span></header>
     <div class="player-layout">
       <div class="player-main">
         <img class="now-cover" :src="track.coverUrl" alt="" />
-        <div class="now-track"><div><h1>{{ track.title }}</h1><p>{{ track.artist }}</p></div><button class="heart-button" aria-label="喜欢">♡</button></div>
+        <div class="now-track"><div><h1>{{ track.title }}</h1><p>{{ track.artist }}</p></div><button class="heart-button" aria-label="喜欢"><Heart /></button></div>
         <div v-if="player.error" class="playback-error"><span>{{ player.error }}</span><button @click="player.togglePlayback()">重试</button></div>
         <div class="progress-wrap"><input :value="player.currentTime" type="range" min="0" :max="player.duration || track.duration" step="0.1" aria-label="播放进度" @input="seek" /><div><time>{{ formatDuration(player.currentTime) }}</time><time>{{ formatDuration(player.duration || track.duration) }}</time></div></div>
         <PlayerControls />
-        <div class="volume-row"><span>{{ player.muted || player.volume === 0 ? '◌' : '◖' }}</span><input :value="player.muted ? 0 : player.volume" type="range" min="0" max="1" step="0.01" aria-label="音量" @input="player.setVolume(Number(($event.target as HTMLInputElement).value))" /><button @click="player.toggleMuted()">{{ player.muted ? '取消静音' : '静音' }}</button></div>
+        <div class="volume-row"><span><VolumeX v-if="player.muted || player.volume === 0" :size="17" /><Volume2 v-else :size="17" /></span><input :value="player.muted ? 0 : player.volume" type="range" min="0" max="1" step="0.01" aria-label="音量" @input="player.setVolume(Number(($event.target as HTMLInputElement).value))" /><button @click="player.toggleMuted()">{{ player.muted ? '取消静音' : '静音' }}</button></div>
       </div>
       <SyncedLyrics :lines="track.lyrics" :current-time="player.currentTime" @seek="player.setTime" />
     </div>
