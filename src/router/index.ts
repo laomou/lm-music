@@ -22,7 +22,8 @@ export const router = createRouter({
     { path: '/:pathMatch(.*)*', redirect: '/playlists' },
   ],
   scrollBehavior(_to, _from, savedPosition) {
-    return savedPosition ?? { top: 0, behavior: 'smooth' }
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    return savedPosition ?? { top: 0, behavior }
   },
 })
 
