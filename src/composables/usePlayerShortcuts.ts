@@ -3,7 +3,7 @@ import { usePlayerStore } from '@/stores/player'
 
 function isTypingTarget(target: EventTarget | null) {
   const element = target instanceof HTMLElement ? target : null
-  const interactive = element?.closest('a,button,input,textarea,select,[contenteditable="true"]')
+  const interactive = element?.closest('a,button,input,textarea,select,[contenteditable]')
   return Boolean(interactive)
 }
 
