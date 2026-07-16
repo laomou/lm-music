@@ -11,6 +11,12 @@ const router = useRouter()
 const auth = useAuthStore()
 const app = useAppStore()
 const provider = computed(() => auth.session ? getProviderForSession(auth.session) : null)
+const sourceLabel = computed(() => {
+  if (!provider.value) return t('settings.source')
+  return auth.session?.provider === 'audius'
+    ? provider.value.label.toUpperCase()
+    : `${provider.value.label.toUpperCase()} ${t('settings.server').toUpperCase()}`
+})
 const language = computed({
   get: () => locale.value,
   set: (value: Locale) => setLocale(value),
@@ -26,7 +32,7 @@ function disconnect() {
   <section class="page settings-page">
     <button type="button" class="back-button" @click="router.push('/playlists')"><ArrowLeft :size="18" /> {{ t('common.backToLibrary') }}</button>
     <p class="eyebrow">{{ t('common.settings') }}</p><h1>{{ t('settings.title') }}</h1>
-    <div class="settings-card"><small>{{ provider?.label?.toUpperCase() || t('settings.source') }} {{ auth.session?.provider === 'audius' ? '' : 'SERVER' }}</small><strong>{{ auth.session?.provider === 'audius' ? t('settings.publicCatalog') : auth.session?.serverUrl || t('settings.connect') }}</strong><span>{{ provider ? provider.supportsOfflineDownload ? t('settings.supportsOffline', { subtitle: getProviderSubtitle(provider) }) : t('settings.onlineOnly', { subtitle: getProviderSubtitle(provider) }) : t('settings.offlineOnly') }}</span></div>
+    <div class="settings-card"><small>{{ sourceLabel }}</small><strong>{{ auth.session?.provider === 'audius' ? t('settings.publicCatalog') : auth.session?.serverUrl || t('settings.connect') }}</strong><span>{{ provider ? provider.supportsOfflineDownload ? t('settings.supportsOffline', { subtitle: getProviderSubtitle(provider) }) : t('settings.onlineOnly', { subtitle: getProviderSubtitle(provider) }) : t('settings.offlineOnly') }}</span></div>
     <label class="settings-card locale-settings"><small>{{ t('common.language') }}</small><select v-model="language"><option value="zh-CN">{{ t('common.chinese') }}</option><option value="en">{{ t('common.english') }}</option></select></label>
     <button type="button" class="settings-card settings-button-card" @click="router.push('/connect')"><small>{{ t('settings.source') }}</small><strong>{{ t('settings.switchSource') }}</strong><span>{{ t('settings.switchDescription') }}</span></button>
     <button type="button" class="settings-card settings-button-card" @click="router.push('/downloads')"><small>{{ t('settings.cache') }}</small><strong>{{ t('settings.manageCache') }}</strong><span>{{ t('settings.cacheDescription') }}</span></button>
