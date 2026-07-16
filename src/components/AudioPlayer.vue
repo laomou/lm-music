@@ -41,6 +41,21 @@ function handleError() {
       : t('player.codecError')
   player.setError(message)
 }
+
+async function handleEnded() {
+  if (player.repeatMode !== 'one' || !audio.value) {
+    player.handleEnded()
+    return
+  }
+
+  player.setTime(0)
+  audio.value.currentTime = 0
+  try {
+    await audio.value.play()
+  } catch {
+    if (player.isPlaying) player.togglePlayback()
+  }
+}
 </script>
 
 <template>
@@ -49,7 +64,7 @@ function handleError() {
     preload="metadata"
     @timeupdate="onTimeUpdate"
     @loadedmetadata="onLoadedMetadata"
-    @ended="player.handleEnded()"
+    @ended="handleEnded"
     @error="handleError"
   />
 </template>
