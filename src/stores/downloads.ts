@@ -34,6 +34,7 @@ export const useDownloadsStore = defineStore('downloads', {
     error: '',
     storageUsage: 0,
     storageQuota: 0,
+    refreshToken: 0,
     controllers: new Map<string, AbortController>(),
   }),
   getters: {
@@ -46,6 +47,7 @@ export const useDownloadsStore = defineStore('downloads', {
   },
   actions: {
     clearState() {
+      this.refreshToken += 1
       this.controllers.forEach((controller) => controller.abort())
       this.controllers.clear()
       this.tracks = []
@@ -57,18 +59,23 @@ export const useDownloadsStore = defineStore('downloads', {
       this.storageQuota = 0
     },
     async refresh() {
+      const token = ++this.refreshToken
+      const serverId = this.serverId
       this.loading = true
       try {
-        const result = await getDownloadedTracks(this.serverId)
+        const result = await getDownloadedTracks(serverId)
+        if (token !== this.refreshToken || serverId !== this.serverId) return
         this.tracks = result.tracks
         this.totalBytes = result.totalBytes
         const storage = await getStorageEstimate()
+        if (token !== this.refreshToken || serverId !== this.serverId) return
         this.storageUsage = storage.usage
         this.storageQuota = storage.quota
       } catch (error) {
+        if (token !== this.refreshToken || serverId !== this.serverId) return
         this.error = error instanceof Error ? error.message : t('error.readDownloadsFailed')
       } finally {
-        this.loading = false
+        if (token === this.refreshToken && serverId === this.serverId) this.loading = false
       }
     },
     async downloadSingle(track: Track, playlistId?: string) {
