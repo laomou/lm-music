@@ -6,6 +6,7 @@ export function useMediaSession() {
   const player = usePlayerStore()
   if (!('mediaSession' in navigator)) return
   watch(() => player.currentTrack, (track: Track | null) => {
+    document.title = track ? `${track.title} · ${track.artist} — LM Music` : 'LM Music'
     if (!track) return
     navigator.mediaSession.metadata = new MediaMetadata({ title: track.title, artist: track.artist, album: track.album, artwork: track.coverUrl ? [{ src: track.coverUrl, sizes: '512x512' }] : [] })
   }, { immediate: true })
