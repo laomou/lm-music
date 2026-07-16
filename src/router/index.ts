@@ -13,12 +13,12 @@ export const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/', redirect: '/playlists' },
-    { path: '/connect', component: ConnectView },
-    { path: '/playlists', component: PlaylistsView },
-    { path: '/playlist/:id', component: PlaylistDetailView, props: true },
-    { path: '/now-playing', component: NowPlayingView },
-    { path: '/settings', component: SettingsView },
-    { path: '/downloads', component: DownloadsView },
+    { path: '/connect', component: ConnectView, meta: { titleKey: 'page.connect' } },
+    { path: '/playlists', component: PlaylistsView, meta: { titleKey: 'library.title' } },
+    { path: '/playlist/:id', component: PlaylistDetailView, props: true, meta: { titleKey: 'playlist.label' } },
+    { path: '/now-playing', component: NowPlayingView, meta: { titleKey: 'player.nowPlaying' } },
+    { path: '/settings', component: SettingsView, meta: { titleKey: 'common.settings' } },
+    { path: '/downloads', component: DownloadsView, meta: { titleKey: 'downloads.title' } },
     { path: '/:pathMatch(.*)*', redirect: '/playlists' },
   ],
   scrollBehavior(_to, _from, savedPosition) {

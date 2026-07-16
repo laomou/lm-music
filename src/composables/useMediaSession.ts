@@ -4,10 +4,6 @@ import { usePlayerStore } from '@/stores/player'
 
 export function useMediaSession() {
   const player = usePlayerStore()
-  watch(() => player.currentTrack, (track: Track | null) => {
-    document.title = track ? `${track.title} · ${track.artist} — LM Music` : 'LM Music'
-  }, { immediate: true })
-
   if (!('mediaSession' in navigator)) return
   watch(() => player.currentTrack, (track: Track | null) => {
     if (!track) {
