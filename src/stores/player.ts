@@ -4,13 +4,18 @@ import type { RepeatMode, Track } from '@/types/music'
 const STORAGE_KEY = 'lm-music-player'
 
 type PersistedPlayer = {
-  currentTrackId?: string
+  currentTrack?: Track | null
+  queue?: Track[]
+  currentIndex?: number
   currentTime: number
   volume: number
   muted: boolean
   shuffle: boolean
   repeatMode: RepeatMode
+  recentTracks?: RecentTrack[]
 }
+
+export type RecentTrack = Track & { playedAt: number }
 
 const restore = (): PersistedPlayer => {
   try {
@@ -34,6 +39,7 @@ export const usePlayerStore = defineStore('player', {
       muted: saved.muted ?? false,
       shuffle: saved.shuffle ?? false,
       repeatMode: saved.repeatMode ?? 'off' as RepeatMode,
+      recentTracks: saved.recentTracks ?? [] as RecentTrack[],
       error: '',
     }
   },
@@ -44,13 +50,34 @@ export const usePlayerStore = defineStore('player', {
   actions: {
     persist() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        currentTrackId: this.currentTrack?.id,
+        currentTrack: this.currentTrack,
+        queue: this.queue,
+        currentIndex: this.currentIndex,
         currentTime: this.currentTime,
         volume: this.volume,
         muted: this.muted,
         shuffle: this.shuffle,
         repeatMode: this.repeatMode,
+        recentTracks: this.recentTracks,
       }))
+    },
+    restorePlayback() {
+      const saved = restore()
+      if (!saved.currentTrack) return
+      this.currentTrack = saved.currentTrack
+      this.queue = saved.queue?.length ? saved.queue : [saved.currentTrack]
+      const queueIndex = saved.currentIndex ?? this.queue.findIndex((track) => track.id === saved.currentTrack?.id)
+      this.currentIndex = Math.max(0, Math.min(queueIndex, this.queue.length - 1))
+      this.currentTime = saved.currentTime ?? 0
+      this.duration = saved.currentTrack.duration
+      // A restored app should never try to autoplay without a user gesture.
+      this.isPlaying = false
+    },
+    rememberTrack(track: Track) {
+      this.recentTracks = [
+        { ...track, playedAt: Date.now() },
+        ...this.recentTracks.filter((item) => item.id !== track.id),
+      ].slice(0, 12)
     },
     play(track: Track, queue: Track[], startTime = 0) {
       this.error = ''
@@ -60,6 +87,7 @@ export const usePlayerStore = defineStore('player', {
       this.currentTime = startTime
       this.duration = track.duration
       this.isPlaying = true
+      this.rememberTrack(this.currentTrack)
       this.persist()
     },
     togglePlayback() {
@@ -111,6 +139,7 @@ export const usePlayerStore = defineStore('player', {
       this.currentTime = 0
       this.duration = this.currentTrack.duration
       this.isPlaying = true
+      this.rememberTrack(this.currentTrack)
       this.persist()
     },
     previous() {
@@ -122,6 +151,7 @@ export const usePlayerStore = defineStore('player', {
         this.currentTrack = this.queue[this.currentIndex]
         this.duration = this.currentTrack.duration
         this.currentTime = 0
+        this.rememberTrack(this.currentTrack)
       }
       this.persist()
     },

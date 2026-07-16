@@ -18,7 +18,7 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
     }
   }
 
-  watch(() => player.currentTrack?.id, loadSource)
+  watch(() => player.currentTrack?.id, loadSource, { immediate: true })
   watch(() => player.isPlaying, async (playing) => {
     if (!audio.value || !player.currentTrack) return
     try {
