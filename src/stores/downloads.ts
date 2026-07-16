@@ -152,7 +152,8 @@ export const useDownloadsStore = defineStore('downloads', {
     },
     async retry(task: DownloadTask, source: { playlist?: Playlist; track?: Track }) {
       if (task.id.startsWith('playlist:') && source.playlist) await this.downloadPlaylist(source.playlist)
-      if (task.id.startsWith('track:') && source.track) await this.downloadSingle(source.track, source.playlist?.id)
+      else if (task.id.startsWith('track:') && source.track) await this.downloadSingle(source.track, source.playlist?.id)
+      else this.error = t('error.retrySourceMissing')
     },
     async remove(track: DownloadedTrack) {
       await deleteDownloadedTrack(track.id)
