@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Pause, Play } from '@lucide/vue'
 import { useRouter } from 'vue-router'
 import { usePlayerStore } from '@/stores/player'
+import { t } from '@/i18n'
 
 const player = usePlayerStore()
 const router = useRouter()
@@ -31,7 +32,7 @@ const progressOffset = computed(() => circumference * (1 - progress.value))
           :stroke-dashoffset="progressOffset"
         />
       </svg>
-      <span class="mini-toggle" role="button" :aria-label="player.isPlaying ? '暂停' : '播放'" @click.stop="player.togglePlayback()"><Pause v-if="player.isPlaying" :size="15" fill="currentColor" /><Play v-else :size="15" fill="currentColor" /></span>
+      <span class="mini-toggle" role="button" :aria-label="player.isPlaying ? t('player.pause') : t('player.play')" @click.stop="player.togglePlayback()"><Pause v-if="player.isPlaying" :size="15" fill="currentColor" /><Play v-else :size="15" fill="currentColor" /></span>
     </span>
   </button>
 </template>

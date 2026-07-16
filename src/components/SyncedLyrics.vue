@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import type { LyricLine } from '@/types/music'
+import { t } from '@/i18n'
 
 const props = defineProps<{ lines: LyricLine[]; currentTime: number }>()
 const emit = defineEmits<{ seek: [time: number] }>()
@@ -21,8 +22,8 @@ watch(activeIndex, async (index) => {
 </script>
 
 <template>
-  <section class="lyrics-panel" aria-label="同步歌词">
-    <p class="section-label">歌词</p>
+  <section class="lyrics-panel" :aria-label="t('player.lyrics')">
+    <p class="section-label">{{ t('player.lyrics') }}</p>
     <div v-if="lines.length" ref="container" class="lyrics-scroll">
       <button
         v-for="(line, index) in lines"
@@ -35,6 +36,6 @@ watch(activeIndex, async (index) => {
         {{ line.text || '♪' }}
       </button>
     </div>
-    <p v-else class="empty-lyrics">暂无同步歌词</p>
+    <p v-else class="empty-lyrics">{{ t('player.noLyrics') }}</p>
   </section>
 </template>

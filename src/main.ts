@@ -4,15 +4,18 @@ import { registerSW } from 'virtual:pwa-register'
 import App from './App.vue'
 import { router } from './router'
 import { useAppStore } from './stores/app'
+import { i18n, locale } from './i18n'
 import './styles/global.css'
 
 const app = createApp(App)
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)
+app.use(i18n)
 app.mount('#app')
 
 const appStore = useAppStore(pinia)
+document.documentElement.lang = locale.value
 window.addEventListener('beforeinstallprompt', (event) => {
   event.preventDefault()
   appStore.setInstallPrompt(event as BeforeInstallPromptEvent)
