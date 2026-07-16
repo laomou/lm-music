@@ -64,6 +64,10 @@ function playCollection(tracks: typeof library.allTracks) {
   router.push('/now-playing')
 }
 
+function openCollection(id: string) {
+  router.push(`/collection/${id}`)
+}
+
 function clearRecent() {
   if (window.confirm(t('library.confirmClearRecent'))) player.clearRecentTracks()
 }
@@ -109,13 +113,13 @@ function clearRecent() {
       </button>
     </div>
     <div v-else-if="viewMode === 'albums' && albums.length" class="playlist-grid">
-      <button type="button" v-for="album in albums" :key="album.id" class="playlist-card" :aria-label="t('library.openAlbum', { name: album.name })" @click="playCollection(album.tracks)">
+      <button type="button" v-for="album in albums" :key="album.id" class="playlist-card" :aria-label="t('library.openAlbum', { name: album.name })" @click="openCollection(album.id)">
         <CoverImage :src="album.coverUrl" alt="" />
         <span><strong :title="album.name">{{ album.name }}</strong><small>{{ album.subtitle }} · {{ t('library.trackCount', { count: album.tracks.length }) }}</small></span>
       </button>
     </div>
     <div v-else-if="viewMode === 'artists' && artists.length" class="playlist-grid">
-      <button type="button" v-for="artist in artists" :key="artist.id" class="playlist-card" :aria-label="t('library.openArtist', { name: artist.name })" @click="playCollection(artist.tracks)">
+      <button type="button" v-for="artist in artists" :key="artist.id" class="playlist-card" :aria-label="t('library.openArtist', { name: artist.name })" @click="openCollection(artist.id)">
         <CoverImage :src="artist.coverUrl" alt="" />
         <span><strong :title="artist.name">{{ artist.name }}</strong><small>{{ t('library.trackCount', { count: artist.tracks.length }) }}</small></span>
       </button>

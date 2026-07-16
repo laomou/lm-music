@@ -5,6 +5,7 @@ import PlaylistDetailView from '@/views/PlaylistDetailView.vue'
 import NowPlayingView from '@/views/NowPlayingView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import DownloadsView from '@/views/DownloadsView.vue'
+import CollectionDetailView from '@/views/CollectionDetailView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 export const router = createRouter({
@@ -16,6 +17,7 @@ export const router = createRouter({
     { path: '/connect', component: ConnectView, meta: { titleKey: 'page.connect' } },
     { path: '/playlists', component: PlaylistsView, meta: { titleKey: 'library.title' } },
     { path: '/playlist/:id', component: PlaylistDetailView, props: true, meta: { titleKey: 'playlist.label' } },
+    { path: '/collection/:id', component: CollectionDetailView, meta: { titleKey: 'playlist.label' } },
     { path: '/now-playing', component: NowPlayingView, meta: { titleKey: 'player.nowPlaying' } },
     { path: '/settings', component: SettingsView, meta: { titleKey: 'common.settings' } },
     { path: '/downloads', component: DownloadsView, meta: { titleKey: 'downloads.title' } },
