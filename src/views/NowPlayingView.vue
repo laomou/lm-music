@@ -29,7 +29,7 @@ function seek(event: Event) {
       <div class="player-main">
         <CoverImage class="now-cover" :src="track.coverUrl" alt="" loading="eager" />
         <div class="now-track"><div class="now-track-copy"><h1 :title="track.title">{{ track.title }}</h1><p :title="track.artist">{{ track.artist }}</p></div><span class="heart-button" aria-hidden="true"><Heart /></span></div>
-        <div v-if="player.error" class="playback-error"><span>{{ player.error }}</span><button type="button" @click="player.togglePlayback()">{{ t('common.retry') }}</button></div>
+        <div v-if="player.error" class="playback-error" role="alert"><span>{{ player.error }}</span><button type="button" @click="player.togglePlayback()">{{ t('common.retry') }}</button></div>
         <div class="progress-wrap"><input :value="player.currentTime" type="range" min="0" :max="player.duration || track.duration" step="0.1" :aria-label="t('player.nowPlaying')" :aria-valuetext="`${formatDuration(player.currentTime)} / ${formatDuration(player.duration || track.duration)}`" @input="seek" /><div><time>{{ formatDuration(player.currentTime) }}</time><time>{{ formatDuration(player.duration || track.duration) }}</time></div></div>
         <PlayerControls />
         <div class="volume-row"><span><VolumeX v-if="player.muted || player.volume === 0" :size="17" /><Volume2 v-else :size="17" /></span><input :value="player.muted ? 0 : player.volume" type="range" min="0" max="1" step="0.01" :aria-label="t('player.volume')" :aria-valuetext="`${Math.round((player.muted ? 0 : player.volume) * 100)}%`" @input="player.setVolume(Number(($event.target as HTMLInputElement).value))" /><button type="button" @click="player.toggleMuted()">{{ player.muted ? t('player.unmute') : t('player.mute') }}</button></div>
