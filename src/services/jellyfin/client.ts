@@ -77,7 +77,7 @@ export class JellyfinClient {
   async getPlaylistTracks(playlistId: string): Promise<Track[]> {
     const params = new URLSearchParams({ UserId: this.session.userId, Fields: 'PrimaryImageAspectRatio,AlbumPrimaryImageTag' })
     const result = await this.request<JellyfinItemsResponse>(`/Playlists/${playlistId}/Items?${params}`)
-    return result.Items.map((item) => this.toTrack(item))
+    return result.Items.filter((item) => item.RunTimeTicks !== undefined).map((item) => this.toTrack(item))
   }
 
   async getAllTracks(): Promise<Track[]> {
@@ -90,7 +90,7 @@ export class JellyfinClient {
       Limit: '500',
     })
     const result = await this.request<JellyfinItemsResponse>(`/Users/${this.session.userId}/Items?${params}`)
-    return result.Items.map((item) => this.toTrack(item))
+    return result.Items.filter((item) => item.RunTimeTicks !== undefined).map((item) => this.toTrack(item))
   }
 
   imageUrl(itemId: string, tag?: string) {
