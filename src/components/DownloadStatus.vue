@@ -24,6 +24,7 @@ const isComplete = computed(() => latestTask.value?.status === 'completed')
     v-if="latestTask"
     class="download-status"
     :class="{ complete: isComplete }"
+    aria-live="polite"
   >
     <button type="button" class="download-status-open" @click="router.push('/downloads')">
       <span class="download-status-icon">
