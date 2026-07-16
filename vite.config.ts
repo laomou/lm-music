@@ -31,9 +31,15 @@ export default defineConfig({
         navigateFallback: '/index.html',
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.includes('/Images/'),
+            // Covers can come from Jellyfin, Navidrome, or Audius CDN mirrors.
+            // Cache all image requests rather than only Jellyfin's /Images path.
+            urlPattern: ({ request }) => request.destination === 'image',
             handler: 'CacheFirst',
-            options: { cacheName: 'lm-music-artwork', expiration: { maxEntries: 250, maxAgeSeconds: 60 * 60 * 24 * 30 } },
+            options: {
+              cacheName: 'lm-music-artwork',
+              cacheableResponse: { statuses: [0, 200] },
+              expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
           },
           {
             urlPattern: ({ url }) => url.pathname.includes('/Lyrics'),

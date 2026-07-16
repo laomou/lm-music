@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import AudioPlayer from '@/components/AudioPlayer.vue'
 import AppNotice from '@/components/AppNotice.vue'
+import DownloadStatus from '@/components/DownloadStatus.vue'
 import MiniPlayer from '@/components/MiniPlayer.vue'
 
 const route = useRoute()
@@ -14,6 +15,7 @@ const isConnect = computed(() => route.path === '/connect')
   <main class="app-shell" :class="{ 'connect-shell': isConnect }">
     <RouterView />
   </main>
+  <DownloadStatus v-if="!isConnect" />
   <MiniPlayer v-if="!isConnect" />
   <AppNotice />
 </template>

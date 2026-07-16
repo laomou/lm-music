@@ -259,7 +259,7 @@ type LyricLine = {
 | 应用代码、图标 | Service Worker 预缓存 | 自动 |
 | 歌单与曲目元数据 | IndexedDB | 自动缓存最近内容 |
 | 歌词 | IndexedDB | 自动缓存已访问内容 |
-| 封面 | Cache Storage | 自动缓存已访问内容 |
+| 封面 | Cache Storage | 自动缓存已访问内容；Jellyfin、Navidrome 与 Audius 封面统一复用 |
 | 播放偏好与进度 | IndexedDB 或 LocalStorage | 自动保存 |
 | 音频 | Cache Storage | 仅用户主动下载 |
 
