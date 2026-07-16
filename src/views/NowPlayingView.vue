@@ -28,7 +28,7 @@ function seek(event: Event) {
     <div class="player-layout">
       <div class="player-main">
         <CoverImage class="now-cover" :src="track.coverUrl" alt="" loading="eager" />
-        <div class="now-track"><div class="now-track-copy"><h1 :title="track.title">{{ track.title }}</h1><p :title="track.artist">{{ track.artist }}</p></div><button type="button" class="heart-button" :aria-label="t('player.like')"><Heart /></button></div>
+        <div class="now-track"><div class="now-track-copy"><h1 :title="track.title">{{ track.title }}</h1><p :title="track.artist">{{ track.artist }}</p></div><span class="heart-button" aria-hidden="true"><Heart /></span></div>
         <div v-if="player.error" class="playback-error"><span>{{ player.error }}</span><button type="button" @click="player.togglePlayback()">{{ t('common.retry') }}</button></div>
         <div class="progress-wrap"><input :value="player.currentTime" type="range" min="0" :max="player.duration || track.duration" step="0.1" :aria-label="t('player.nowPlaying')" @input="seek" /><div><time>{{ formatDuration(player.currentTime) }}</time><time>{{ formatDuration(player.duration || track.duration) }}</time></div></div>
         <PlayerControls />
