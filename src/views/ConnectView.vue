@@ -20,6 +20,10 @@ const language = computed({
   get: () => locale.value,
   set: (value: Locale) => setLocale(value),
 })
+const insecureServerUrl = computed(() => {
+  const source = getMusicProvider(provider.value)
+  return source.requiresCredentials && location.protocol === 'https:' && serverUrl.value.trim().toLowerCase().startsWith('http://')
+})
 
 async function connect() {
   loading.value = true
@@ -51,8 +55,9 @@ async function connect() {
       <fieldset class="provider-picker"><legend>{{ t('connect.source') }}</legend><label v-for="source in musicProviders" :key="source.id" :class="{ selected: provider === source.id, 'audius-option': source.id === 'audius' }"><input v-model="provider" type="radio" :value="source.id" /><span><strong>{{ source.label }}</strong><small>{{ getProviderSubtitle(source) }}</small></span></label></fieldset>
       <template v-if="getMusicProvider(provider).requiresCredentials"><label>{{ t('connect.serverUrl') }}<input v-model.trim="serverUrl" required type="url" :placeholder="provider === 'jellyfin' ? 'https://jellyfin.example.com' : 'https://music.example.com'" /></label><label>{{ t('connect.username') }}<input v-model.trim="username" required autocomplete="username" :placeholder="t('connect.username')" /></label><label>{{ t('connect.password') }}<input v-model="password" required type="password" autocomplete="current-password" :placeholder="t('connect.password')" /></label></template>
       <p v-else class="provider-description">{{ t('connect.audiusDescription') }}</p>
-      <p v-if="error" class="form-error" role="alert">{{ error }}</p>
-      <button type="submit" class="primary-button" :disabled="loading">{{ loading ? t('connect.connecting') : provider === 'audius' ? t('connect.browseAudius') : t('connect.connect', { provider: getMusicProvider(provider).label }) }}</button>
+      <p v-if="insecureServerUrl" class="form-error" role="alert">{{ t('connect.insecureServer') }}</p>
+      <p v-else-if="error" class="form-error" role="alert">{{ error }}</p>
+      <button type="submit" class="primary-button" :disabled="loading || insecureServerUrl">{{ loading ? t('connect.connecting') : provider === 'audius' ? t('connect.browseAudius') : t('connect.connect', { provider: getMusicProvider(provider).label }) }}</button>
     </form>
   </section>
 </template>
