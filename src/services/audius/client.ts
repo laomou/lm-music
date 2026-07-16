@@ -68,14 +68,17 @@ export class AudiusClient {
   }
 
   private toTrack(track: AudiusTrack): Track | null {
-    if (!track.is_streamable || !track.stream?.url) return null
+    if (!track.is_streamable) return null
     return {
       id: track.id,
       title: track.title,
       artist: track.user?.name ?? 'Audius 创作者',
       duration: track.duration ?? 0,
       coverUrl: track.artwork?.['480x480'] ?? track.artwork?.['1000x1000'],
-      streamUrl: track.stream.url,
+      // Ask Audius to resolve a fresh stream URL when playback begins. The
+      // direct mirror URL returned in list responses is short-lived and some
+      // mirrors reject browser media requests.
+      streamUrl: `${API_URL}/tracks/${track.id}/stream`,
       lyrics: [],
       allowOfflineDownload: false,
     }
