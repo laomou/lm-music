@@ -9,11 +9,11 @@ withDefaults(defineProps<{
   loading: 'lazy',
 })
 
-const fallbackSrc = `${import.meta.env.BASE_URL}favicon.svg`
+const fallbackSrc = `${import.meta.env.BASE_URL}icon-192.png`
 
 function useFallback(event: Event) {
   const image = event.currentTarget as HTMLImageElement
-  if (image.src.endsWith('/favicon.svg')) return
+  if (image.src.endsWith('/icon-192.png')) return
   image.src = fallbackSrc
 }
 </script>

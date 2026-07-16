@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { getMusicProvider, musicProviders } from '@/services/providers'
 import { useAuthStore } from '@/stores/auth'
 import type { MusicProviderType } from '@/types/music'
-import { ArrowLeft, Music2 } from '@lucide/vue'
+import { ArrowLeft } from '@lucide/vue'
 import { locale, setLocale, t, type Locale } from '@/i18n'
 
 const router = useRouter()
@@ -15,6 +15,7 @@ const password = ref('')
 const loading = ref(false)
 const error = ref('')
 const provider = ref<MusicProviderType>('jellyfin')
+const appIconSrc = `${import.meta.env.BASE_URL}icon-192.png`
 const language = computed({
   get: () => locale.value,
   set: (value: Locale) => setLocale(value),
@@ -39,7 +40,7 @@ async function connect() {
 <template>
   <section class="connect-page">
     <div class="connect-toolbar"><button v-if="auth.isConnected" class="back-button connect-back" @click="router.push('/playlists')"><ArrowLeft :size="18" /> {{ t('connect.back') }}</button><label class="locale-select"><span>{{ t('common.language') }}</span><select v-model="language"><option value="zh-CN">{{ t('common.chinese') }}</option><option value="en">{{ t('common.english') }}</option></select></label></div>
-    <div class="brand-mark"><Music2 /></div>
+    <img class="brand-mark" :src="appIconSrc" alt="LM Music" />
     <p class="eyebrow">LM MUSIC</p>
     <h1 v-html="t('connect.title')" />
     <p class="muted">{{ t('connect.description') }}</p>
