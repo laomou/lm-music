@@ -5,6 +5,7 @@ export const useAppStore = defineStore('app', {
     deferredInstallPrompt: null as BeforeInstallPromptEvent | null,
     updateAvailable: false,
     offlineReady: false,
+    isOffline: !navigator.onLine,
     serviceWorkerError: '',
     updateServiceWorker: null as null | ((reloadPage?: boolean) => Promise<void>),
     checkForUpdate: null as null | (() => Promise<void>),
@@ -18,6 +19,9 @@ export const useAppStore = defineStore('app', {
     },
     clearInstallPrompt() {
       this.deferredInstallPrompt = null
+    },
+    setOffline(isOffline: boolean) {
+      this.isOffline = isOffline
     },
     async install() {
       if (!this.deferredInstallPrompt) return false

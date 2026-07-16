@@ -14,4 +14,7 @@ const app = useAppStore()
     <span><strong>{{ t('notice.offlineReady') }}</strong><small>{{ t('notice.offlineReadyDescription') }}</small></span>
     <button class="notice-muted" @click="app.offlineReady = false">{{ t('notice.gotIt') }}</button>
   </aside>
+  <aside v-else-if="app.isOffline" class="app-notice compact" role="status">
+    <span><strong>{{ t('notice.offlineTitle') }}</strong><small>{{ t('notice.offlineDescription') }}</small></span>
+  </aside>
 </template>

@@ -117,6 +117,8 @@ const messages: Record<Locale, Record<string, Translation>> = {
     'notice.offlineReady': '离线模式已准备好',
     'notice.offlineReadyDescription': '已下载的歌曲可在没有网络时播放。',
     'notice.gotIt': '知道了',
+    'notice.offlineTitle': '当前处于离线状态',
+    'notice.offlineDescription': '可以继续播放已下载的歌曲和已缓存的内容。',
   },
   en: {
     'common.backToLibrary': 'Back to playlists',
@@ -224,6 +226,8 @@ const messages: Record<Locale, Record<string, Translation>> = {
     'notice.offlineReady': 'Offline mode is ready',
     'notice.offlineReadyDescription': 'Downloaded tracks can play without a network connection.',
     'notice.gotIt': 'Got it',
+    'notice.offlineTitle': 'You are offline',
+    'notice.offlineDescription': 'Downloaded tracks and cached content are still available.',
   },
 }
 

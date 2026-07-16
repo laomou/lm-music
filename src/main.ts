@@ -21,6 +21,8 @@ window.addEventListener('beforeinstallprompt', (event) => {
   appStore.setInstallPrompt(event as BeforeInstallPromptEvent)
 })
 window.addEventListener('appinstalled', () => appStore.clearInstallPrompt())
+window.addEventListener('online', () => appStore.setOffline(false))
+window.addEventListener('offline', () => appStore.setOffline(true))
 
 const updateServiceWorker = registerSW({
   immediate: true,
