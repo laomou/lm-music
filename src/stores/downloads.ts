@@ -71,6 +71,7 @@ export const useDownloadsStore = defineStore('downloads', {
         if (token !== this.refreshToken || serverId !== this.serverId) return
         this.storageUsage = storage.usage
         this.storageQuota = storage.quota
+        if (!this.tasks.some((task) => task.status === 'failed')) this.error = ''
       } catch (error) {
         if (token !== this.refreshToken || serverId !== this.serverId) return
         this.error = error instanceof Error ? error.message : t('error.readDownloadsFailed')
