@@ -26,6 +26,11 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
           { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
+        shortcuts: [
+          { name: 'Playlists', short_name: 'Playlists', url: `${base}#/playlists`, icons: [{ src: 'icon-192.png', sizes: '192x192' }] },
+          { name: 'Downloads', short_name: 'Downloads', url: `${base}#/downloads`, icons: [{ src: 'icon-192.png', sizes: '192x192' }] },
+          { name: 'Settings', short_name: 'Settings', url: `${base}#/settings`, icons: [{ src: 'icon-192.png', sizes: '192x192' }] },
+        ],
       },
       workbox: {
         navigateFallback: '/index.html',
