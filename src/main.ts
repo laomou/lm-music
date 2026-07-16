@@ -4,7 +4,7 @@ import { registerSW } from 'virtual:pwa-register'
 import App from './App.vue'
 import { router } from './router'
 import { useAppStore } from './stores/app'
-import { i18n, locale } from './i18n'
+import { i18n, locale, t } from './i18n'
 import './styles/global.css'
 
 const app = createApp(App)
@@ -26,7 +26,7 @@ const updateServiceWorker = registerSW({
   immediate: true,
   onNeedRefresh: () => { appStore.updateAvailable = true },
   onOfflineReady: () => { appStore.offlineReady = true },
-  onRegisterError: () => { appStore.serviceWorkerError = '离线功能暂不可用，请检查浏览器设置。' },
+  onRegisterError: () => { appStore.serviceWorkerError = t('error.offlineUnavailable') },
 })
 appStore.setUpdateHandler(updateServiceWorker)
 appStore.setUpdateChecker(updateServiceWorker.update)

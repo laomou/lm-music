@@ -29,7 +29,7 @@ async function connect() {
     auth.saveSession(session)
     await router.push('/playlists')
   } catch (reason) {
-    error.value = reason instanceof Error ? reason.message : '连接失败，请重试。'
+    error.value = reason instanceof Error ? reason.message : t('common.connectFailed')
   } finally {
     loading.value = false
   }

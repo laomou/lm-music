@@ -31,7 +31,7 @@ function seek(event: Event) {
         <div v-if="player.error" class="playback-error"><span>{{ player.error }}</span><button @click="player.togglePlayback()">{{ t('common.retry') }}</button></div>
         <div class="progress-wrap"><input :value="player.currentTime" type="range" min="0" :max="player.duration || track.duration" step="0.1" :aria-label="t('player.nowPlaying')" @input="seek" /><div><time>{{ formatDuration(player.currentTime) }}</time><time>{{ formatDuration(player.duration || track.duration) }}</time></div></div>
         <PlayerControls />
-        <div class="volume-row"><span><VolumeX v-if="player.muted || player.volume === 0" :size="17" /><Volume2 v-else :size="17" /></span><input :value="player.muted ? 0 : player.volume" type="range" min="0" max="1" step="0.01" aria-label="音量" @input="player.setVolume(Number(($event.target as HTMLInputElement).value))" /><button @click="player.toggleMuted()">{{ player.muted ? '取消静音' : '静音' }}</button></div>
+        <div class="volume-row"><span><VolumeX v-if="player.muted || player.volume === 0" :size="17" /><Volume2 v-else :size="17" /></span><input :value="player.muted ? 0 : player.volume" type="range" min="0" max="1" step="0.01" :aria-label="t('player.volume')" @input="player.setVolume(Number(($event.target as HTMLInputElement).value))" /><button @click="player.toggleMuted()">{{ player.muted ? t('player.unmute') : t('player.mute') }}</button></div>
       </div>
       <SyncedLyrics :lines="track.lyrics" :current-time="player.currentTime" @seek="player.setTime" />
     </div>
