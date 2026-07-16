@@ -43,7 +43,7 @@ function playRecent(trackId: string) {
 
     <div v-if="player.recentTracks.length" class="section-heading"><h2>{{ t('library.recent') }}</h2></div>
     <div v-if="player.recentTracks.length" class="recent-tracks">
-      <button type="button" v-for="track in player.recentTracks.slice(0, 6)" :key="track.id" class="recent-track" :aria-label="player.currentTrack?.id === track.id ? t('player.currentlyPlaying', { title: track.title }) : t('playlist.playTrack', { title: track.title })" @click="playRecent(track.id)">
+      <button type="button" v-for="track in player.recentTracks.slice(0, 6)" :key="track.id" class="recent-track" :aria-current="player.currentTrack?.id === track.id ? 'true' : undefined" :aria-label="player.currentTrack?.id === track.id ? t('player.currentlyPlaying', { title: track.title }) : t('playlist.playTrack', { title: track.title })" @click="playRecent(track.id)">
         <CoverImage :src="track.coverUrl" alt="" /><span><strong>{{ track.title }}</strong><small>{{ track.artist }}</small></span><Play :size="16" fill="currentColor" />
       </button>
     </div>
