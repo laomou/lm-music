@@ -2,9 +2,11 @@
 withDefaults(defineProps<{
   src?: string
   alt?: string
+  loading?: 'eager' | 'lazy'
 }>(), {
   src: '',
   alt: '',
+  loading: 'lazy',
 })
 
 const fallbackSrc = `${import.meta.env.BASE_URL}favicon.svg`
@@ -17,5 +19,5 @@ function useFallback(event: Event) {
 </script>
 
 <template>
-  <img :src="src || fallbackSrc" :alt="alt" @error="useFallback" />
+  <img :src="src || fallbackSrc" :alt="alt" :loading="loading" decoding="async" @error="useFallback" />
 </template>

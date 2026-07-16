@@ -27,7 +27,7 @@ function seek(event: Event) {
     <header class="now-header"><button class="back-button" :aria-label="t('common.backToLibrary')" @click="router.push('/playlists')"><ChevronDown /></button><p>{{ t('player.nowPlaying') }}</p><span></span></header>
     <div class="player-layout">
       <div class="player-main">
-        <CoverImage class="now-cover" :src="track.coverUrl" alt="" />
+        <CoverImage class="now-cover" :src="track.coverUrl" alt="" loading="eager" />
         <div class="now-track"><div class="now-track-copy"><h1 :title="track.title">{{ track.title }}</h1><p :title="track.artist">{{ track.artist }}</p></div><button class="heart-button" :aria-label="t('player.like')"><Heart /></button></div>
         <div v-if="player.error" class="playback-error"><span>{{ player.error }}</span><button @click="player.togglePlayback()">{{ t('common.retry') }}</button></div>
         <div class="progress-wrap"><input :value="player.currentTime" type="range" min="0" :max="player.duration || track.duration" step="0.1" :aria-label="t('player.nowPlaying')" @input="seek" /><div><time>{{ formatDuration(player.currentTime) }}</time><time>{{ formatDuration(player.duration || track.duration) }}</time></div></div>
