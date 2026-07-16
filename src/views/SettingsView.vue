@@ -23,6 +23,7 @@ const language = computed({
 })
 
 function disconnect() {
+  if (!window.confirm(t('settings.confirmDisconnect'))) return
   auth.logout()
   router.push('/connect')
 }
