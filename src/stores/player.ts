@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import type { RepeatMode, Track } from '@/types/music'
 
 const STORAGE_KEY = 'lm-music-player'
+const SETTINGS_KEY = 'lm-music-player-settings'
 
 type PersistedPlayer = {
   currentTrack?: Track | null
@@ -21,7 +22,9 @@ export type FavoriteTrack = Track & { favoritedAt: number }
 
 const restore = (): PersistedPlayer => {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as PersistedPlayer
+    const playback = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as PersistedPlayer
+    const settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') as Partial<PersistedPlayer>
+    return { ...playback, ...settings }
   } catch {
     return { currentTime: 0, volume: 0.8, muted: false, shuffle: false, repeatMode: 'off' }
   }
@@ -53,18 +56,26 @@ export const usePlayerStore = defineStore('player', {
   },
   actions: {
     persist() {
-      this.lastPersistedTime = this.currentTime
+      this.persistPlayback()
+      this.persistSettings()
+    },
+    persistPlayback() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         currentTrack: this.currentTrack,
         queue: this.queue,
         currentIndex: this.currentIndex,
+        recentTracks: this.recentTracks,
+        favoriteTracks: this.favoriteTracks,
+      }))
+    },
+    persistSettings() {
+      this.lastPersistedTime = this.currentTime
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({
         currentTime: this.currentTime,
         volume: this.volume,
         muted: this.muted,
         shuffle: this.shuffle,
         repeatMode: this.repeatMode,
-        recentTracks: this.recentTracks,
-        favoriteTracks: this.favoriteTracks,
       }))
     },
     restorePlayback() {
@@ -87,7 +98,7 @@ export const usePlayerStore = defineStore('player', {
     },
     clearRecentTracks() {
       this.recentTracks = []
-      this.persist()
+      this.persistPlayback()
     },
     isFavorite(trackId: string) {
       return this.favoriteTracks.some((item) => item.id === trackId)
@@ -96,7 +107,7 @@ export const usePlayerStore = defineStore('player', {
       this.favoriteTracks = this.isFavorite(track.id)
         ? this.favoriteTracks.filter((item) => item.id !== track.id)
         : [{ ...track, favoritedAt: Date.now() }, ...this.favoriteTracks]
-      this.persist()
+      this.persistPlayback()
     },
     play(track: Track, queue: Track[], startTime = 0) {
       this.error = ''
@@ -113,14 +124,14 @@ export const usePlayerStore = defineStore('player', {
       if (!this.currentTrack) return
       this.isPlaying = !this.isPlaying
       if (this.isPlaying) this.error = ''
-      this.persist()
+      this.persistSettings()
     },
     setTime(time: number) {
       this.currentTime = Math.max(0, time)
       // Audio timeupdate fires several times per second. Persisting every
       // event makes playback needlessly write to localStorage, so save at a
       // useful cadence and always flush on pause/visibility changes.
-      if (Math.abs(this.currentTime - this.lastPersistedTime) >= 2) this.persist()
+      if (Math.abs(this.currentTime - this.lastPersistedTime) >= 2) this.persistSettings()
     },
     setDuration(duration: number) {
       this.duration = duration
@@ -128,19 +139,19 @@ export const usePlayerStore = defineStore('player', {
     setVolume(volume: number) {
       this.volume = volume
       this.muted = volume === 0
-      this.persist()
+      this.persistSettings()
     },
     toggleMuted() {
       this.muted = !this.muted
-      this.persist()
+      this.persistSettings()
     },
     toggleShuffle() {
       this.shuffle = !this.shuffle
-      this.persist()
+      this.persistSettings()
     },
     cycleRepeatMode() {
       this.repeatMode = this.repeatMode === 'off' ? 'all' : this.repeatMode === 'all' ? 'one' : 'off'
-      this.persist()
+      this.persistSettings()
     },
     removeFromQueue(index: number) {
       if (index < 0 || index >= this.queue.length || index === this.currentIndex) return
@@ -209,7 +220,7 @@ export const usePlayerStore = defineStore('player', {
     setError(message: string) {
       this.error = message
       this.isPlaying = false
-      this.persist()
+      this.persistSettings()
     },
     clearError() {
       this.error = ''
