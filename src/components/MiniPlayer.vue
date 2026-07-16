@@ -19,7 +19,7 @@ const progressOffset = computed(() => circumference * (1 - progress.value))
 
 <template>
   <aside v-if="player.currentTrack" class="mini-player">
-    <button type="button" class="mini-player-open" @click="router.push('/now-playing')">
+    <button type="button" class="mini-player-open" :aria-label="t('player.openNowPlaying', { title: player.currentTrack.title })" @click="router.push('/now-playing')">
       <CoverImage :src="player.currentTrack.coverUrl" alt="" />
       <span class="mini-meta"><strong :title="player.currentTrack.title">{{ player.currentTrack.title }}</strong><small :title="player.currentTrack.artist">{{ player.currentTrack.artist }}</small></span>
     </button>
