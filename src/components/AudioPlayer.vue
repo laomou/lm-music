@@ -1,26 +1,32 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import { useAudioPlayer } from '@/composables/useAudioPlayer'
 import { useMediaSession } from '@/composables/useMediaSession'
 import { useAuthStore } from '@/stores/auth'
 import { useLibraryStore } from '@/stores/library'
-import { onMounted } from 'vue'
 import { t } from '@/i18n'
+import type { MusicSession } from '@/types/music'
+
+function sessionKey(session: MusicSession | null) {
+  return session ? `${session.provider}:${session.serverUrl}:${session.username}` : 'disconnected'
+}
 
 const audio = ref<HTMLAudioElement | null>(null)
 const player = usePlayerStore()
 const auth = useAuthStore()
 const library = useLibraryStore()
+const activeSessionKey = ref(sessionKey(auth.session))
 const { onTimeUpdate, onLoadedMetadata } = useAudioPlayer(audio)
 useMediaSession()
 onMounted(() => player.restorePlayback())
 
 auth.$subscribe(() => {
-  if (!auth.session) {
-    player.clearPlayback()
-    library.clear()
-  }
+  const nextSessionKey = sessionKey(auth.session)
+  if (nextSessionKey === activeSessionKey.value) return
+  activeSessionKey.value = nextSessionKey
+  player.clearPlayback()
+  library.clear()
 })
 
 function handleError() {
