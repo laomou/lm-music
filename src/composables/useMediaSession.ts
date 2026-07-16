@@ -14,6 +14,7 @@ function setMediaActionHandler(action: MediaSessionAction, handler: MediaSession
 export function useMediaSession() {
   const player = usePlayerStore()
   const fallbackArtwork = `${import.meta.env.BASE_URL}icon-512.png`
+  const effectiveDuration = () => player.duration || player.currentTrack?.duration || 0
   if (!('mediaSession' in navigator)) return
   watch(() => player.currentTrack, (track: Track | null) => {
     if (!track) {
@@ -49,5 +50,5 @@ export function useMediaSession() {
   setMediaActionHandler('nexttrack', () => player.next())
   setMediaActionHandler('seekto', (details) => { if (details.seekTime !== undefined) player.setTime(details.seekTime) })
   setMediaActionHandler('seekbackward', (details) => player.setTime(Math.max(0, player.currentTime - (details.seekOffset ?? 10))))
-  setMediaActionHandler('seekforward', (details) => player.setTime(Math.min(player.duration, player.currentTime + (details.seekOffset ?? 10))))
+  setMediaActionHandler('seekforward', (details) => player.setTime(Math.min(effectiveDuration(), player.currentTime + (details.seekOffset ?? 10))))
 }
