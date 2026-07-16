@@ -38,6 +38,13 @@ auth.$subscribe(() => {
 })
 
 async function handleError() {
+  const streamUrl = player.currentTrack?.streamUrl ?? ''
+  const insecureFallbackUrl = player.currentTrack?.fallbackStreamUrl ?? ''
+  if (location.protocol === 'https:' && (streamUrl.startsWith('http://') || insecureFallbackUrl.startsWith('http://'))) {
+    player.setError(t('player.insecureServerError'))
+    return
+  }
+
   const fallbackUrl = player.currentTrack?.fallbackStreamUrl
   if (audio.value && fallbackUrl && !fallbackAttempted.value && audio.value.src !== fallbackUrl) {
     fallbackAttempted.value = true
