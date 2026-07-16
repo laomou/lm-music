@@ -40,7 +40,7 @@ function play(index: number) {
     <div class="playlist-actions"><button type="button" class="primary-button" @click="play(0)"><Play :size="17" fill="currentColor" /> {{ t('playlist.playAll') }}</button><button type="button" v-if="canDownload" class="secondary-button" :disabled="downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading'" @click="download"><Download :size="16" /> {{ downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading' ? t('playlist.downloading', { completed: downloads.taskFor(`playlist:${playlist.id}`)?.completed || 0, total: playlist.tracks.length }) : t('playlist.download') }}</button><span v-else class="online-only">{{ t('playlist.onlineOnly') }}</span></div>
     <div class="track-list">
       <div v-for="(track, index) in playlist.tracks" :key="track.id" class="track-row" :class="{ current: player.currentTrack?.id === track.id }">
-        <button type="button" class="track-play" @click="play(index)">
+        <button type="button" class="track-play" :aria-label="player.currentTrack?.id === track.id ? t('player.currentlyPlaying', { title: track.title }) : t('playlist.playTrack', { title: track.title })" @click="play(index)">
           <span class="track-number"><Radio v-if="player.currentTrack?.id === track.id && player.isPlaying" :size="15" />{{ player.currentTrack?.id === track.id && player.isPlaying ? '' : String(index + 1).padStart(2, '0') }}</span>
           <CoverImage :src="track.coverUrl" alt="" /><span class="track-copy"><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span>
         </button>
