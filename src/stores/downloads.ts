@@ -12,6 +12,7 @@ import {
 } from '@/services/offline-storage'
 import { getProviderForSession, sessionCacheId } from '@/services/providers'
 import { useAuthStore } from './auth'
+import { t } from '@/i18n'
 
 export type DownloadTask = {
   id: string
@@ -54,7 +55,7 @@ export const useDownloadsStore = defineStore('downloads', {
         this.storageUsage = storage.usage
         this.storageQuota = storage.quota
       } catch (error) {
-        this.error = error instanceof Error ? error.message : '无法读取离线内容。'
+        this.error = error instanceof Error ? error.message : t('error.readDownloadsFailed')
       } finally {
         this.loading = false
       }
@@ -62,7 +63,7 @@ export const useDownloadsStore = defineStore('downloads', {
     async downloadSingle(track: Track, playlistId?: string) {
       const auth = useAuthStore()
       if (track.allowOfflineDownload === false || (auth.session && !getProviderForSession(auth.session).supportsOfflineDownload)) {
-        this.error = '当前音乐来源仅支持在线播放，不能离线下载。'
+        this.error = t('error.streamingOnly')
         return
       }
       if (this.isDownloaded(track.id)) return
@@ -83,7 +84,7 @@ export const useDownloadsStore = defineStore('downloads', {
         if (controller.signal.aborted) task.status = 'cancelled'
         else {
           task.status = 'failed'
-          task.error = error instanceof Error ? error.message : '下载失败。'
+          task.error = error instanceof Error ? error.message : t('error.downloadFailed')
           this.error = task.error
         }
       } finally {
@@ -93,7 +94,7 @@ export const useDownloadsStore = defineStore('downloads', {
     async downloadPlaylist(playlist: Playlist) {
       const auth = useAuthStore()
       if (playlist.tracks.some((track) => track.allowOfflineDownload === false) || (auth.session && !getProviderForSession(auth.session).supportsOfflineDownload)) {
-        this.error = '当前音乐来源仅支持在线播放，不能离线下载。'
+        this.error = t('error.streamingOnly')
         return
       }
       const task: DownloadTask = { id: `playlist:${playlist.id}`, label: playlist.name, completed: 0, total: playlist.tracks.length, receivedBytes: 0, totalBytes: 0, status: 'downloading' }
@@ -120,7 +121,7 @@ export const useDownloadsStore = defineStore('downloads', {
         if (controller.signal.aborted) task.status = 'cancelled'
         else {
           task.status = 'failed'
-          task.error = error instanceof Error ? error.message : '歌单下载失败。'
+          task.error = error instanceof Error ? error.message : t('error.playlistDownloadFailed')
           this.error = task.error
         }
       } finally {

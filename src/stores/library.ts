@@ -3,6 +3,7 @@ import { getLibrary, getDownloadedTracks, saveLibrary } from '@/services/offline
 import { getProviderForSession, sessionCacheId } from '@/services/providers'
 import type { Playlist } from '@/types/music'
 import { useAuthStore } from './auth'
+import { t } from '@/i18n'
 
 export const useLibraryStore = defineStore('library', {
   state: () => ({ playlists: [] as Playlist[], loading: false, error: '', source: 'network' as 'network' | 'cache' }),
@@ -22,11 +23,11 @@ export const useLibraryStore = defineStore('library', {
           this.source = 'cache'
         }
         if (!auth.session) {
-          if (!this.playlists.length) throw new Error('请先连接音乐服务器或 Audius。')
+          if (!this.playlists.length) throw new Error(t('error.connectSourceFirst'))
           return
         }
         if (!navigator.onLine) {
-          if (!this.playlists.length) throw new Error('当前离线，且没有已缓存的歌单。')
+          if (!this.playlists.length) throw new Error(t('error.noCachedPlaylists'))
           const downloaded = await getDownloadedTracks(cacheId)
           const trackIds = new Set(downloaded.tracks.map((track) => track.trackId))
           this.playlists = this.playlists
@@ -39,7 +40,7 @@ export const useLibraryStore = defineStore('library', {
         this.source = 'network'
         await saveLibrary(cacheId, playlists)
       } catch (error) {
-        if (!this.playlists.length) this.error = error instanceof Error ? error.message : '无法读取 Jellyfin 歌单。'
+        if (!this.playlists.length) this.error = error instanceof Error ? error.message : t('error.readLibraryFailed')
         else this.source = 'cache'
       } finally {
         this.loading = false
