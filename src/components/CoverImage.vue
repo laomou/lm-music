@@ -1,5 +1,7 @@
 <script setup lang="ts">
-withDefaults(defineProps<{
+import { computed } from 'vue'
+
+const props = withDefaults(defineProps<{
   src?: string
   alt?: string
   loading?: 'eager' | 'lazy'
@@ -10,6 +12,10 @@ withDefaults(defineProps<{
 })
 
 const fallbackSrc = `${import.meta.env.BASE_URL}icon-192.png`
+const displaySrc = computed(() => {
+  const source = props.src || fallbackSrc
+  return location.protocol === 'https:' && source.startsWith('http://') ? fallbackSrc : source
+})
 
 function useFallback(event: Event) {
   const image = event.currentTarget as HTMLImageElement
@@ -19,5 +25,5 @@ function useFallback(event: Event) {
 </script>
 
 <template>
-  <img :src="src || fallbackSrc" :alt="alt" :loading="loading" decoding="async" @error="useFallback" />
+  <img :src="displaySrc" :alt="alt" :loading="loading" decoding="async" @error="useFallback" />
 </template>
