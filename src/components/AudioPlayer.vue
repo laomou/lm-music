@@ -10,7 +10,9 @@ import { t } from '@/i18n'
 import type { MusicSession } from '@/types/music'
 
 function sessionKey(session: MusicSession | null) {
-  return session ? `${session.provider}:${session.serverUrl}:${session.username}` : 'disconnected'
+  if (!session) return 'disconnected'
+  const identity = session.provider === 'jellyfin' ? session.userId : session.username
+  return `${session.provider}:${session.serverUrl}:${identity}`
 }
 
 const audio = ref<HTMLAudioElement | null>(null)
