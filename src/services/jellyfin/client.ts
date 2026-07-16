@@ -51,7 +51,7 @@ export class JellyfinClient {
       Fields: 'PrimaryImageAspectRatio,ChildCount',
     })
     const result = await this.request<JellyfinItemsResponse>(`/Users/${this.session.userId}/Items?${params}`)
-    return Promise.all(result.Items.map(async (item) => {
+    const playlists = await Promise.all(result.Items.map(async (item) => {
       const tracks = await this.getPlaylistTracks(item.Id)
       return {
         id: item.Id,
@@ -62,11 +62,34 @@ export class JellyfinClient {
         tracks,
       }
     }))
+    if (playlists.some((playlist) => playlist.tracks.length)) return playlists
+
+    const tracks = await this.getAllTracks()
+    return tracks.length ? [{
+      id: 'jellyfin-all-songs',
+      name: t('jellyfin.allSongs'),
+      description: t('jellyfin.allSongsDescription'),
+      coverUrl: tracks[0]?.coverUrl,
+      tracks,
+    }] : playlists
   }
 
   async getPlaylistTracks(playlistId: string): Promise<Track[]> {
     const params = new URLSearchParams({ UserId: this.session.userId, Fields: 'PrimaryImageAspectRatio,AlbumPrimaryImageTag' })
     const result = await this.request<JellyfinItemsResponse>(`/Playlists/${playlistId}/Items?${params}`)
+    return result.Items.map((item) => this.toTrack(item))
+  }
+
+  async getAllTracks(): Promise<Track[]> {
+    const params = new URLSearchParams({
+      UserId: this.session.userId,
+      IncludeItemTypes: 'Audio',
+      Recursive: 'true',
+      SortBy: 'SortName',
+      Fields: 'PrimaryImageAspectRatio,AlbumPrimaryImageTag',
+      Limit: '500',
+    })
+    const result = await this.request<JellyfinItemsResponse>(`/Users/${this.session.userId}/Items?${params}`)
     return result.Items.map((item) => this.toTrack(item))
   }
 
