@@ -39,7 +39,7 @@ async function connect() {
 
 <template>
   <section class="connect-page">
-    <div class="connect-toolbar"><button v-if="auth.isConnected" class="back-button connect-back" @click="router.push('/playlists')"><ArrowLeft :size="18" /> {{ t('connect.back') }}</button><label class="locale-select"><span>{{ t('common.language') }}</span><select v-model="language"><option value="zh-CN">{{ t('common.chinese') }}</option><option value="en">{{ t('common.english') }}</option></select></label></div>
+    <div class="connect-toolbar"><button type="button" v-if="auth.isConnected" class="back-button connect-back" @click="router.push('/playlists')"><ArrowLeft :size="18" /> {{ t('connect.back') }}</button><label class="locale-select"><span>{{ t('common.language') }}</span><select v-model="language"><option value="zh-CN">{{ t('common.chinese') }}</option><option value="en">{{ t('common.english') }}</option></select></label></div>
     <img class="brand-mark" :src="appIconSrc" alt="LM Music" />
     <p class="eyebrow">LM MUSIC</p>
     <h1 v-html="t('connect.title')" />
@@ -49,7 +49,7 @@ async function connect() {
       <template v-if="getMusicProvider(provider).requiresCredentials"><label>{{ t('connect.serverUrl') }}<input v-model.trim="serverUrl" required type="url" :placeholder="provider === 'jellyfin' ? 'https://jellyfin.example.com' : 'https://music.example.com'" /></label><label>{{ t('connect.username') }}<input v-model.trim="username" required autocomplete="username" :placeholder="t('connect.username')" /></label><label>{{ t('connect.password') }}<input v-model="password" required type="password" autocomplete="current-password" :placeholder="t('connect.password')" /></label></template>
       <p v-else class="provider-description">{{ t('connect.audiusDescription') }}</p>
       <p v-if="error" class="form-error">{{ error }}</p>
-      <button class="primary-button" :disabled="loading">{{ loading ? t('connect.connecting') : provider === 'audius' ? t('connect.browseAudius') : t('connect.connect', { provider: getMusicProvider(provider).label }) }}</button>
+      <button type="submit" class="primary-button" :disabled="loading">{{ loading ? t('connect.connecting') : provider === 'audius' ? t('connect.browseAudius') : t('connect.connect', { provider: getMusicProvider(provider).label }) }}</button>
     </form>
   </section>
 </template>

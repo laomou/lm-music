@@ -25,7 +25,7 @@ const isComplete = computed(() => latestTask.value?.status === 'completed')
     class="download-status"
     :class="{ complete: isComplete }"
   >
-    <button class="download-status-open" @click="router.push('/downloads')">
+    <button type="button" class="download-status-open" @click="router.push('/downloads')">
       <span class="download-status-icon">
         <Check v-if="isComplete" :size="16" />
         <Download v-else :size="16" />
@@ -36,7 +36,7 @@ const isComplete = computed(() => latestTask.value?.status === 'completed')
         <small>{{ isComplete ? t('downloads.manage') : t('downloads.progress', { completed: latestTask.completed, total: latestTask.total, percent: progress }) }}</small>
       </span>
     </button>
-    <button v-if="latestTask.status === 'downloading'" class="download-status-cancel" :aria-label="t('downloads.cancelDownload')" @click="downloads.cancel(latestTask.id)"><X :size="16" /></button>
-    <button v-else class="download-status-cancel" :aria-label="t('downloads.dismissStatus')" @click="downloads.dismissTask(latestTask.id)"><X :size="16" /></button>
+    <button type="button" v-if="latestTask.status === 'downloading'" class="download-status-cancel" :aria-label="t('downloads.cancelDownload')" @click="downloads.cancel(latestTask.id)"><X :size="16" /></button>
+    <button type="button" v-else class="download-status-cancel" :aria-label="t('downloads.dismissStatus')" @click="downloads.dismissTask(latestTask.id)"><X :size="16" /></button>
   </aside>
 </template>

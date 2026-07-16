@@ -25,7 +25,7 @@ watch(activeIndex, async (index) => {
   <section class="lyrics-panel" :aria-label="t('player.lyrics')">
     <p class="section-label">{{ t('player.lyrics') }}</p>
     <div v-if="lines.length" ref="container" class="lyrics-scroll">
-      <button
+      <button type="button"
         v-for="(line, index) in lines"
         :key="`${line.time}-${index}`"
         class="lyric-line"

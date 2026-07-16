@@ -11,13 +11,13 @@ const canGoNext = computed(() => player.queue.length > 1 && (player.shuffle || p
 
 <template>
   <div class="player-controls" :aria-label="t('player.nowPlaying')">
-    <button class="icon-button secondary" :class="{ active: player.shuffle }" :aria-label="t('player.shuffle')" :disabled="player.queue.length < 2" @click="player.toggleShuffle()"><Shuffle /></button>
-    <button class="icon-button" :aria-label="t('player.previous')" :disabled="!canGoPrevious" @click="player.previous()"><SkipBack /></button>
-    <button class="play-button" :aria-label="player.isPlaying ? t('player.pause') : t('player.play')" @click="player.togglePlayback()">
+    <button type="button" class="icon-button secondary" :class="{ active: player.shuffle }" :aria-label="t('player.shuffle')" :disabled="player.queue.length < 2" @click="player.toggleShuffle()"><Shuffle /></button>
+    <button type="button" class="icon-button" :aria-label="t('player.previous')" :disabled="!canGoPrevious" @click="player.previous()"><SkipBack /></button>
+    <button type="button" class="play-button" :aria-label="player.isPlaying ? t('player.pause') : t('player.play')" @click="player.togglePlayback()">
       <Pause v-if="player.isPlaying" :size="28" fill="currentColor" />
       <Play v-else :size="28" fill="currentColor" />
     </button>
-    <button class="icon-button" :aria-label="t('player.next')" :disabled="!canGoNext" @click="player.next()"><SkipForward /></button>
-    <button class="icon-button secondary" :class="{ active: player.repeatMode !== 'off' }" :aria-label="t('player.repeat')" @click="player.cycleRepeatMode()"><Repeat1 v-if="player.repeatMode === 'one'" /><Repeat2 v-else /></button>
+    <button type="button" class="icon-button" :aria-label="t('player.next')" :disabled="!canGoNext" @click="player.next()"><SkipForward /></button>
+    <button type="button" class="icon-button secondary" :class="{ active: player.repeatMode !== 'off' }" :aria-label="t('player.repeat')" @click="player.cycleRepeatMode()"><Repeat1 v-if="player.repeatMode === 'one'" /><Repeat2 v-else /></button>
   </div>
 </template>

@@ -35,18 +35,18 @@ function play(index: number) {
 
 <template>
   <section v-if="playlist" class="page playlist-detail">
-    <button class="back-button" @click="router.push('/playlists')"><ArrowLeft :size="18" /> {{ t('common.backToLibrary') }}</button>
+    <button type="button" class="back-button" @click="router.push('/playlists')"><ArrowLeft :size="18" /> {{ t('common.backToLibrary') }}</button>
     <div class="playlist-hero"><CoverImage :src="playlist.coverUrl" alt="" /><div><p class="eyebrow">{{ t('playlist.label') }}</p><h1>{{ playlist.name }}</h1><p>{{ playlist.description || t('playlist.trackCount', { count: playlist.tracks.length }) }}</p><span>{{ t('playlist.trackDuration', { count: playlist.tracks.length, duration: formatDuration(playlist.tracks.reduce((total, track) => total + track.duration, 0)) }) }}</span></div></div>
-    <div class="playlist-actions"><button class="primary-button" @click="play(0)"><Play :size="17" fill="currentColor" /> {{ t('playlist.playAll') }}</button><button v-if="canDownload" class="secondary-button" :disabled="downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading'" @click="download"><Download :size="16" /> {{ downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading' ? t('playlist.downloading', { completed: downloads.taskFor(`playlist:${playlist.id}`)?.completed || 0, total: playlist.tracks.length }) : t('playlist.download') }}</button><span v-else class="online-only">{{ t('playlist.onlineOnly') }}</span></div>
+    <div class="playlist-actions"><button type="button" class="primary-button" @click="play(0)"><Play :size="17" fill="currentColor" /> {{ t('playlist.playAll') }}</button><button type="button" v-if="canDownload" class="secondary-button" :disabled="downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading'" @click="download"><Download :size="16" /> {{ downloads.taskFor(`playlist:${playlist.id}`)?.status === 'downloading' ? t('playlist.downloading', { completed: downloads.taskFor(`playlist:${playlist.id}`)?.completed || 0, total: playlist.tracks.length }) : t('playlist.download') }}</button><span v-else class="online-only">{{ t('playlist.onlineOnly') }}</span></div>
     <div class="track-list">
       <div v-for="(track, index) in playlist.tracks" :key="track.id" class="track-row" :class="{ current: player.currentTrack?.id === track.id }">
-        <button class="track-play" @click="play(index)">
+        <button type="button" class="track-play" @click="play(index)">
           <span class="track-number"><Radio v-if="player.currentTrack?.id === track.id && player.isPlaying" :size="15" />{{ player.currentTrack?.id === track.id && player.isPlaying ? '' : String(index + 1).padStart(2, '0') }}</span>
           <CoverImage :src="track.coverUrl" alt="" /><span class="track-copy"><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span>
         </button>
-        <span class="track-actions"><button v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="downloads.isDownloaded(track.id) ? t('playlist.downloadedTrack', { title: track.title }) : t('playlist.downloadTrack', { title: track.title })" :disabled="downloads.isDownloaded(track.id)" @click="downloads.downloadSingle(track, playlist.id)"><Check v-if="downloads.isDownloaded(track.id)" :size="16" /><Download v-else :size="16" /></button><time>{{ formatDuration(track.duration) }}</time></span>
+        <span class="track-actions"><button type="button" v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="downloads.isDownloaded(track.id) ? t('playlist.downloadedTrack', { title: track.title }) : t('playlist.downloadTrack', { title: track.title })" :disabled="downloads.isDownloaded(track.id)" @click="downloads.downloadSingle(track, playlist.id)"><Check v-if="downloads.isDownloaded(track.id)" :size="16" /><Download v-else :size="16" /></button><time>{{ formatDuration(track.duration) }}</time></span>
       </div>
     </div>
   </section>
-  <section v-else class="page empty-state"><p>{{ t('playlist.notFound') }}</p><button class="primary-button" @click="router.push('/playlists')">{{ t('common.backToLibrary') }}</button></section>
+  <section v-else class="page empty-state"><p>{{ t('playlist.notFound') }}</p><button type="button" class="primary-button" @click="router.push('/playlists')">{{ t('common.backToLibrary') }}</button></section>
 </template>
