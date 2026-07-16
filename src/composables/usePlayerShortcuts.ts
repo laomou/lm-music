@@ -2,8 +2,9 @@ import { onBeforeUnmount, onMounted } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 
 function isTypingTarget(target: EventTarget | null) {
-  return target instanceof HTMLElement
-    && (target.isContentEditable || ['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+  const element = target instanceof HTMLElement ? target : null
+  const interactive = element?.closest('a,button,input,textarea,select,[contenteditable="true"]')
+  return Boolean(interactive)
 }
 
 export function usePlayerShortcuts() {
