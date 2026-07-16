@@ -6,7 +6,7 @@ import SyncedLyrics from '@/components/SyncedLyrics.vue'
 import { useLibraryStore } from '@/stores/library'
 import { usePlayerStore } from '@/stores/player'
 import { formatDuration } from '@/utils/formatDuration'
-import { ChevronDown, Heart, Volume2, VolumeX } from '@lucide/vue'
+import { ChevronDown, Heart, Volume2, VolumeX, X } from '@lucide/vue'
 import { t } from '@/i18n'
 
 const router = useRouter()
@@ -35,7 +35,7 @@ function seek(event: Event) {
       </div>
       <SyncedLyrics :lines="track.lyrics" :current-time="player.currentTime" @seek="player.setTime" />
     </div>
-    <section class="queue-panel"><div class="section-heading"><h2>{{ t('player.queue') }}</h2><span>{{ player.currentIndex + 1 }} / {{ player.queue.length }}</span></div><div class="queue-items"><button v-for="(item, index) in player.queue" :key="item.id" :class="{ current: item.id === track.id }" @click="player.play(item, player.queue)"><span>{{ index + 1 }}</span><strong :title="item.title">{{ item.title }}</strong><small :title="item.artist">{{ item.artist }}</small></button></div></section>
+    <section class="queue-panel"><div class="section-heading"><h2>{{ t('player.queue') }}</h2><div class="queue-heading-actions"><span>{{ player.currentIndex + 1 }} / {{ player.queue.length }}</span><button v-if="player.queue.length > 1" class="text-button queue-clear" @click="player.clearUpcoming()">{{ t('player.clearQueue') }}</button></div></div><div class="queue-items"><div v-for="(item, index) in player.queue" :key="item.id" class="queue-row" :class="{ current: item.id === track.id }"><button class="queue-play" @click="player.play(item, player.queue)"><span>{{ index + 1 }}</span><strong :title="item.title">{{ item.title }}</strong><small :title="item.artist">{{ item.artist }}</small></button><button v-if="index !== player.currentIndex" class="queue-remove" :aria-label="t('player.removeFromQueue', { title: item.title })" @click="player.removeFromQueue(index)"><X :size="16" /></button></div></div></section>
   </section>
   <section v-else class="page empty-state"><p>{{ t('player.noPlayback') }}</p><button class="primary-button" @click="router.push('/playlists')">{{ t('player.browse') }}</button></section>
 </template>

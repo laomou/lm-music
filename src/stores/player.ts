@@ -119,6 +119,18 @@ export const usePlayerStore = defineStore('player', {
       this.repeatMode = this.repeatMode === 'off' ? 'all' : this.repeatMode === 'all' ? 'one' : 'off'
       this.persist()
     },
+    removeFromQueue(index: number) {
+      if (index < 0 || index >= this.queue.length || index === this.currentIndex) return
+      this.queue.splice(index, 1)
+      if (index < this.currentIndex) this.currentIndex -= 1
+      this.persist()
+    },
+    clearUpcoming() {
+      if (!this.currentTrack) return
+      this.queue = [this.currentTrack]
+      this.currentIndex = 0
+      this.persist()
+    },
     next() {
       if (!this.queue.length || !this.currentTrack) return
       if (this.shuffle && this.queue.length > 1) {
