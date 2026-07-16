@@ -151,6 +151,7 @@ export const useDownloadsStore = defineStore('downloads', {
     dismissTask(taskId: string) {
       if (this.controllers.has(taskId)) return
       this.tasks = this.tasks.filter((task) => task.id !== taskId)
+      if (!this.tasks.some((task) => task.status === 'failed')) this.error = ''
     },
     async retry(task: DownloadTask, source: { playlist?: Playlist; track?: Track }) {
       this.error = ''
