@@ -7,7 +7,7 @@ const player = usePlayerStore()
 </script>
 
 <template>
-  <div class="player-controls" aria-label="播放控制">
+  <div class="player-controls" :aria-label="t('player.nowPlaying')">
     <button class="icon-button secondary" :class="{ active: player.shuffle }" :aria-label="t('player.shuffle')" @click="player.toggleShuffle()"><Shuffle /></button>
     <button class="icon-button" :aria-label="t('player.previous')" @click="player.previous()"><SkipBack /></button>
     <button class="play-button" :aria-label="player.isPlaying ? t('player.pause') : t('player.play')" @click="player.togglePlayback()">
