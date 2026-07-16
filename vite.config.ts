@@ -56,8 +56,9 @@ export default defineConfig({
           },
           {
             // Explicit downloads are written to this cache. This route makes
-            // the same Jellyfin stream URL available while the device is offline.
-            urlPattern: ({ url }) => url.pathname.includes('/Audio/'),
+            // the same Jellyfin and OpenSubsonic/Navidrome stream URLs
+            // available while the device is offline.
+            urlPattern: ({ url }) => url.pathname.includes('/Audio/') || url.pathname.endsWith('/rest/stream.view'),
             handler: 'CacheFirst',
             options: { cacheName: 'lm-music-media-v1', expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 90 } },
           },
