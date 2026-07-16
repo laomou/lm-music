@@ -196,6 +196,7 @@ export const usePlayerStore = defineStore('player', {
       this.duration = 0
       this.isPlaying = false
       this.error = ''
+      this.recentTracks = []
       this.persist()
     },
   },
