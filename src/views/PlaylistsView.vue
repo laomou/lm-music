@@ -38,13 +38,13 @@ function playRecent(trackId: string) {
 
     <button type="button" v-if="player.currentTrack" class="resume-card" :aria-label="t('library.resumeTrack', { title: player.currentTrack.title })" @click="resume">
       <CoverImage :src="player.currentTrack.coverUrl" alt="" />
-      <span><small>{{ t('library.continue') }}</small><strong>{{ player.currentTrack.title }}</strong><em>{{ player.currentTrack.artist }}</em></span><b><Play :size="15" fill="currentColor" /></b>
+      <span><small>{{ t('library.continue') }}</small><strong :title="player.currentTrack.title">{{ player.currentTrack.title }}</strong><em :title="player.currentTrack.artist">{{ player.currentTrack.artist }}</em></span><b><Play :size="15" fill="currentColor" /></b>
     </button>
 
     <div v-if="player.recentTracks.length" class="section-heading"><h2>{{ t('library.recent') }}</h2></div>
     <div v-if="player.recentTracks.length" class="recent-tracks">
       <button type="button" v-for="track in player.recentTracks.slice(0, 6)" :key="track.id" class="recent-track" :aria-current="player.currentTrack?.id === track.id ? 'true' : undefined" :aria-label="player.currentTrack?.id === track.id ? t('player.currentlyPlaying', { title: track.title }) : t('playlist.playTrack', { title: track.title })" @click="playRecent(track.id)">
-        <CoverImage :src="track.coverUrl" alt="" /><span><strong>{{ track.title }}</strong><small>{{ track.artist }}</small></span><Play :size="16" fill="currentColor" />
+        <CoverImage :src="track.coverUrl" alt="" /><span><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span><Play :size="16" fill="currentColor" />
       </button>
     </div>
 
@@ -53,7 +53,7 @@ function playRecent(trackId: string) {
     <div v-if="library.playlists.length" class="playlist-grid">
       <button type="button" v-for="playlist in library.playlists" :key="playlist.id" class="playlist-card" :aria-label="t('library.openPlaylist', { name: playlist.name })" @click="router.push(`/playlist/${playlist.id}`)">
         <CoverImage :src="playlist.coverUrl" alt="" />
-        <span><strong>{{ playlist.name }}</strong><small>{{ t('library.trackCount', { count: playlist.tracks.length }) }}</small></span>
+        <span><strong :title="playlist.name">{{ playlist.name }}</strong><small>{{ t('library.trackCount', { count: playlist.tracks.length }) }}</small></span>
       </button>
     </div>
     <div v-else-if="!library.loading" class="empty-state"><p>{{ auth.isConnected ? t('library.emptyConnected') : t('library.emptyDisconnected') }}</p><button type="button" v-if="!auth.isConnected" class="primary-button" @click="router.push('/connect')">{{ t('library.connect') }}</button></div>
