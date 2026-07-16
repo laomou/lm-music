@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useLibraryStore } from '@/stores/library'
 import { usePlayerStore } from '@/stores/player'
 import { useDownloadsStore } from '@/stores/downloads'
 import { formatDuration } from '@/utils/formatDuration'
-import { ArrowLeft, Check, Download, Play, Radio } from '@lucide/vue'
+import { ArrowLeft, Check, Download, ListPlus, Play, Radio } from '@lucide/vue'
 import { t } from '@/i18n'
 import CoverImage from '@/components/CoverImage.vue'
+import type { Track } from '@/types/music'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,6 +17,7 @@ const player = usePlayerStore()
 const downloads = useDownloadsStore()
 const playlist = computed(() => library.playlists.find((item) => item.id === route.params.id))
 const canDownload = computed(() => !playlist.value?.tracks.some((track) => track.allowOfflineDownload === false))
+const queuedTrackId = ref('')
 
 onMounted(async () => {
   if (!library.playlists.length) await library.fetchPlaylists()
@@ -31,6 +33,12 @@ function play(index: number) {
   player.play(current.tracks[index], current.tracks)
   router.push('/now-playing')
 }
+
+function addToQueue(track: Track) {
+  player.addToQueue(track)
+  queuedTrackId.value = track.id
+  window.setTimeout(() => { if (queuedTrackId.value === track.id) queuedTrackId.value = '' }, 1600)
+}
 </script>
 
 <template>
@@ -45,7 +53,7 @@ function play(index: number) {
           <span class="track-number"><Radio v-if="player.currentTrack?.id === track.id && player.isPlaying" :size="15" />{{ player.currentTrack?.id === track.id && player.isPlaying ? '' : String(index + 1).padStart(2, '0') }}</span>
           <CoverImage :src="track.coverUrl" alt="" /><span class="track-copy"><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span>
         </button>
-        <span class="track-actions"><button type="button" v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="downloads.isDownloaded(track.id) ? t('playlist.downloadedTrack', { title: track.title }) : t('playlist.downloadTrack', { title: track.title })" :disabled="downloads.isDownloaded(track.id)" @click="downloads.downloadSingle(track, playlist.id)"><Check v-if="downloads.isDownloaded(track.id)" :size="16" /><Download v-else :size="16" /></button><time>{{ formatDuration(track.duration) }}</time></span>
+        <span class="track-actions"><button type="button" class="download-icon" :aria-label="queuedTrackId === track.id ? t('player.addedToQueue', { title: track.title }) : t('player.addToQueue', { title: track.title })" @click="addToQueue(track)"><Check v-if="queuedTrackId === track.id" :size="16" /><ListPlus v-else :size="16" /></button><button type="button" v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="downloads.isDownloaded(track.id) ? t('playlist.downloadedTrack', { title: track.title }) : t('playlist.downloadTrack', { title: track.title })" :disabled="downloads.isDownloaded(track.id)" @click="downloads.downloadSingle(track, playlist.id)"><Check v-if="downloads.isDownloaded(track.id)" :size="16" /><Download v-else :size="16" /></button><time>{{ formatDuration(track.duration) }}</time></span>
       </div>
     </div>
   </section>

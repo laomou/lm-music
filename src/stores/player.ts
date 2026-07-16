@@ -141,6 +141,14 @@ export const usePlayerStore = defineStore('player', {
       this.currentIndex = 0
       this.persist()
     },
+    addToQueue(track: Track) {
+      if (!this.currentTrack) {
+        this.play(track, [track])
+        return
+      }
+      this.queue = [...this.queue, track]
+      this.persist()
+    },
     next() {
       if (!this.queue.length || !this.currentTrack) return
       if (this.shuffle && this.queue.length > 1) {
