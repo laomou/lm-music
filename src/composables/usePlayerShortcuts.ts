@@ -3,7 +3,7 @@ import { usePlayerStore } from '@/stores/player'
 
 function isTypingTarget(target: EventTarget | null) {
   return target instanceof HTMLElement
-    && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+    && (target.isContentEditable || ['A', 'BUTTON', 'INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
 }
 
 export function usePlayerShortcuts() {
