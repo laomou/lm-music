@@ -79,6 +79,7 @@ export const useDownloadsStore = defineStore('downloads', {
       }
       if (this.isDownloaded(track.id)) return
       const task: DownloadTask = { id: `track:${track.id}`, label: track.title, completed: 0, total: 1, receivedBytes: 0, totalBytes: 0, status: 'downloading' }
+      if (this.taskFor(task.id)?.status === 'downloading') return
       this.tasks = [...this.tasks.filter((item) => item.id !== task.id), task]
       const currentTask = this.tasks.find((item) => item.id === task.id) ?? task
       const controller = new AbortController()
@@ -110,6 +111,7 @@ export const useDownloadsStore = defineStore('downloads', {
         return
       }
       const task: DownloadTask = { id: `playlist:${playlist.id}`, label: playlist.name, completed: 0, total: playlist.tracks.length, receivedBytes: 0, totalBytes: 0, status: 'downloading' }
+      if (this.taskFor(task.id)?.status === 'downloading') return
       this.tasks = [...this.tasks.filter((item) => item.id !== task.id), task]
       const currentTask = this.tasks.find((item) => item.id === task.id) ?? task
       const controller = new AbortController()
