@@ -159,6 +159,9 @@ export const useDownloadsStore = defineStore('downloads', {
       await this.refresh()
     },
     async clearAll() {
+      this.controllers.forEach((controller) => controller.abort())
+      this.controllers.clear()
+      this.tasks = this.tasks.map((task) => task.status === 'downloading' ? { ...task, status: 'cancelled' } : task)
       await clearServerOfflineData(this.serverId, false)
       await this.refresh()
     },
