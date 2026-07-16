@@ -152,7 +152,9 @@ export async function downloadTrack(serverId: string, track: Track, playlistId?:
 }
 
 export async function getDownloadedTracks(serverId: string): Promise<DownloadSummary> {
-  const tracks = (await allRecords<DownloadedTrack>(DOWNLOAD_STORE)).filter((item) => item.serverId === serverId)
+  const tracks = (await allRecords<DownloadedTrack>(DOWNLOAD_STORE))
+    .filter((item) => item.serverId === serverId)
+    .sort((left, right) => right.downloadedAt - left.downloadedAt)
   return { tracks, totalBytes: tracks.reduce((total, item) => total + item.bytes, 0) }
 }
 
