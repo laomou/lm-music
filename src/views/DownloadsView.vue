@@ -42,7 +42,7 @@ function removeDownload(track: typeof downloads.tracks[number]) {
 </script>
 
 <template>
-  <section class="page downloads-page">
+  <section class="page downloads-page" :aria-busy="downloads.loading">
     <button type="button" class="back-button" @click="router.push('/playlists')"><ArrowLeft :size="18" /> {{ t('common.backToLibrary') }}</button>
     <p class="eyebrow">{{ t('common.downloads') }}</p><h1>{{ t('downloads.title') }}</h1>
     <p v-if="downloads.error" class="form-error" role="alert">{{ downloads.error }}</p>

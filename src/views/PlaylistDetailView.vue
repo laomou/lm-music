@@ -34,7 +34,7 @@ function play(index: number) {
 </script>
 
 <template>
-  <section v-if="playlist" class="page playlist-detail">
+  <section v-if="playlist" class="page playlist-detail" :aria-busy="library.loading">
     <button type="button" class="back-button" @click="router.push('/playlists')"><ArrowLeft :size="18" /> {{ t('common.backToLibrary') }}</button>
     <div class="playlist-hero"><CoverImage :src="playlist.coverUrl" alt="" /><div><p class="eyebrow">{{ t('playlist.label') }}</p><h1>{{ playlist.name }}</h1><p>{{ playlist.description || t('playlist.trackCount', { count: playlist.tracks.length }) }}</p><span>{{ t('playlist.trackDuration', { count: playlist.tracks.length, duration: formatDuration(playlist.tracks.reduce((total, track) => total + track.duration, 0)) }) }}</span></div></div>
     <p v-if="downloads.error" class="form-error" role="alert">{{ downloads.error }}</p>
