@@ -159,6 +159,16 @@ export const usePlayerStore = defineStore('player', {
       if (index < this.currentIndex) this.currentIndex -= 1
       this.persist()
     },
+    reorderQueue(fromIndex: number, toIndex: number) {
+      if (fromIndex < 0 || toIndex < 0 || fromIndex >= this.queue.length || toIndex >= this.queue.length || fromIndex === toIndex) return
+      const nextQueue = [...this.queue]
+      const [movedTrack] = nextQueue.splice(fromIndex, 1)
+      if (!movedTrack) return
+      nextQueue.splice(toIndex, 0, movedTrack)
+      this.queue = nextQueue
+      if (this.currentTrack) this.currentIndex = Math.max(0, this.queue.findIndex((track) => track.id === this.currentTrack?.id))
+      this.persistPlayback()
+    },
     clearUpcoming() {
       if (!this.currentTrack) return
       this.queue = [this.currentTrack]

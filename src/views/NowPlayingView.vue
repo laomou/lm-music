@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import PlayerControls from '@/components/PlayerControls.vue'
 import SyncedLyrics from '@/components/SyncedLyrics.vue'
@@ -14,11 +14,24 @@ const router = useRouter()
 const player = usePlayerStore()
 const library = useLibraryStore()
 const track = computed(() => player.currentTrack)
+const draggingQueueIndex = ref<number | null>(null)
 
 watch(() => track.value?.id, (id) => { if (id) library.loadLyrics(id) }, { immediate: true })
 
 function seek(event: Event) {
   player.setTime(Number((event.target as HTMLInputElement).value))
+}
+
+function startQueueDrag(index: number, event: DragEvent) {
+  draggingQueueIndex.value = index
+  event.dataTransfer?.setData('text/plain', String(index))
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+}
+
+function dropQueueItem(index: number) {
+  if (draggingQueueIndex.value === null) return
+  player.reorderQueue(draggingQueueIndex.value, index)
+  draggingQueueIndex.value = null
 }
 </script>
 
@@ -36,7 +49,7 @@ function seek(event: Event) {
       </div>
       <SyncedLyrics :lines="track.lyrics" :current-time="player.currentTime" @seek="player.setTime" />
     </div>
-    <section class="queue-panel"><div class="section-heading"><h2>{{ t('player.queue') }}</h2><div class="queue-heading-actions"><span>{{ player.currentIndex + 1 }} / {{ player.queue.length }}</span><button type="button" v-if="player.queue.length > 1" class="text-button queue-clear" @click="player.clearUpcoming()">{{ t('player.clearQueue') }}</button></div></div><div class="queue-items"><div v-for="(item, index) in player.queue" :key="item.id" class="queue-row" :class="{ current: item.id === track.id }"><button type="button" class="queue-play" :aria-current="item.id === track.id ? 'true' : undefined" :aria-label="item.id === track.id ? t('player.currentlyPlaying', { title: item.title }) : t('playlist.playTrack', { title: item.title })" @click="player.play(item, player.queue)"><span>{{ index + 1 }}</span><strong :title="item.title">{{ item.title }}</strong><small :title="item.artist">{{ item.artist }}</small></button><button type="button" v-if="index !== player.currentIndex" class="queue-remove" :aria-label="t('player.removeFromQueue', { title: item.title })" @click="player.removeFromQueue(index)"><X :size="16" /></button></div></div></section>
+    <section class="queue-panel"><div class="section-heading"><h2>{{ t('player.queue') }}</h2><div class="queue-heading-actions"><span>{{ player.currentIndex + 1 }} / {{ player.queue.length }}</span><button type="button" v-if="player.queue.length > 1" class="text-button queue-clear" @click="player.clearUpcoming()">{{ t('player.clearQueue') }}</button></div></div><div class="queue-items"><div v-for="(item, index) in player.queue" :key="item.id" class="queue-row" :class="{ current: item.id === track.id, dragging: draggingQueueIndex === index }" draggable="true" @dragstart="startQueueDrag(index, $event)" @dragend="draggingQueueIndex = null" @dragover.prevent @drop="dropQueueItem(index)"><button type="button" class="queue-play" :aria-current="item.id === track.id ? 'true' : undefined" :aria-label="item.id === track.id ? t('player.currentlyPlaying', { title: item.title }) : t('playlist.playTrack', { title: item.title })" @click="player.play(item, player.queue)"><span>{{ index + 1 }}</span><strong :title="item.title">{{ item.title }}</strong><small :title="item.artist">{{ item.artist }}</small></button><button type="button" v-if="index !== player.currentIndex" class="queue-remove" :aria-label="t('player.removeFromQueue', { title: item.title })" @click="player.removeFromQueue(index)"><X :size="16" /></button></div></div></section>
   </section>
   <section v-else class="page empty-state"><p>{{ t('player.noPlayback') }}</p><button type="button" class="primary-button" @click="router.push('/playlists')">{{ t('player.browse') }}</button></section>
 </template>
