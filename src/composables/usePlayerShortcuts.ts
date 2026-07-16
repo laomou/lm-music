@@ -31,6 +31,20 @@ export function usePlayerShortcuts() {
       if (!player.currentTrack) return
       event.preventDefault()
       player.toggleMuted()
+      return
+    }
+
+    if (event.code === 'KeyN') {
+      if (!player.currentTrack || !(player.shuffle || player.hasNext || player.repeatMode === 'all')) return
+      event.preventDefault()
+      player.next()
+      return
+    }
+
+    if (event.code === 'KeyP') {
+      if (!player.currentTrack || !(player.currentTime > 3 || player.hasPrevious)) return
+      event.preventDefault()
+      player.previous()
     }
   }
 
