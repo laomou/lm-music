@@ -6,7 +6,7 @@ import { useAuthStore } from './auth'
 import { t } from '@/i18n'
 
 export const useLibraryStore = defineStore('library', {
-  state: () => ({ playlists: [] as Playlist[], loading: false, error: '', source: 'network' as 'network' | 'cache' }),
+  state: () => ({ playlists: [] as Playlist[], loading: false, error: '', source: 'network' as 'network' | 'cache', fetchToken: 0 }),
   getters: {
     offlinePlaylists: (state) => state.playlists.filter((playlist) => playlist.tracks.length > 0),
   },
@@ -18,12 +18,15 @@ export const useLibraryStore = defineStore('library', {
       this.source = 'network'
     },
     async fetchPlaylists() {
+      const token = ++this.fetchToken
       this.loading = true
       this.error = ''
       const auth = useAuthStore()
       const cacheId = sessionCacheId(auth.session)
+      const isCurrentFetch = () => token === this.fetchToken && cacheId === sessionCacheId(useAuthStore().session)
       try {
         const cached = await getLibrary(cacheId)
+        if (!isCurrentFetch()) return
         if (cached?.playlists.length) {
           this.playlists = cached.playlists
           this.source = 'cache'
@@ -42,14 +45,16 @@ export const useLibraryStore = defineStore('library', {
           return
         }
         const playlists = await getProviderForSession(auth.session).createClient(auth.session).getPlaylists()
+        if (!isCurrentFetch()) return
         this.playlists = playlists
         this.source = 'network'
         await saveLibrary(cacheId, playlists)
       } catch (error) {
+        if (!isCurrentFetch()) return
         if (!this.playlists.length) this.error = error instanceof Error ? error.message : t('error.readLibraryFailed')
         else this.source = 'cache'
       } finally {
-        this.loading = false
+        if (isCurrentFetch()) this.loading = false
       }
     },
     async loadLyrics(trackId: string) {
