@@ -2,6 +2,15 @@ import { watch } from 'vue'
 import type { Track } from '@/types/music'
 import { usePlayerStore } from '@/stores/player'
 
+function setMediaActionHandler(action: MediaSessionAction, handler: MediaSessionActionHandler) {
+  try {
+    navigator.mediaSession.setActionHandler(action, handler)
+  } catch {
+    // Some browsers expose Media Session partially and reject a subset of
+    // action handlers. Keep the rest of the controls available.
+  }
+}
+
 export function useMediaSession() {
   const player = usePlayerStore()
   const fallbackArtwork = `${import.meta.env.BASE_URL}icon-512.png`
@@ -31,11 +40,11 @@ export function useMediaSession() {
     },
     { immediate: true },
   )
-  navigator.mediaSession.setActionHandler('play', () => { if (!player.isPlaying) player.togglePlayback() })
-  navigator.mediaSession.setActionHandler('pause', () => { if (player.isPlaying) player.togglePlayback() })
-  navigator.mediaSession.setActionHandler('previoustrack', () => player.previous())
-  navigator.mediaSession.setActionHandler('nexttrack', () => player.next())
-  navigator.mediaSession.setActionHandler('seekto', (details) => { if (details.seekTime !== undefined) player.setTime(details.seekTime) })
-  navigator.mediaSession.setActionHandler('seekbackward', (details) => player.setTime(Math.max(0, player.currentTime - (details.seekOffset ?? 10))))
-  navigator.mediaSession.setActionHandler('seekforward', (details) => player.setTime(Math.min(player.duration, player.currentTime + (details.seekOffset ?? 10))))
+  setMediaActionHandler('play', () => { if (!player.isPlaying) player.togglePlayback() })
+  setMediaActionHandler('pause', () => { if (player.isPlaying) player.togglePlayback() })
+  setMediaActionHandler('previoustrack', () => player.previous())
+  setMediaActionHandler('nexttrack', () => player.next())
+  setMediaActionHandler('seekto', (details) => { if (details.seekTime !== undefined) player.setTime(details.seekTime) })
+  setMediaActionHandler('seekbackward', (details) => player.setTime(Math.max(0, player.currentTime - (details.seekOffset ?? 10))))
+  setMediaActionHandler('seekforward', (details) => player.setTime(Math.min(player.duration, player.currentTime + (details.seekOffset ?? 10))))
 }
