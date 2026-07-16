@@ -26,6 +26,9 @@ async function connect() {
   error.value = ''
   try {
     const source = getMusicProvider(provider.value)
+    if (source.requiresCredentials && location.protocol === 'https:' && serverUrl.value.trim().toLowerCase().startsWith('http://')) {
+      throw new Error(t('connect.insecureServer'))
+    }
     const session = await source.connect({ serverUrl: serverUrl.value, username: username.value, password: password.value })
     auth.saveSession(session)
     await router.push('/playlists')
