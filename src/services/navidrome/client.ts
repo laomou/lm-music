@@ -73,12 +73,15 @@ export class NavidromeClient {
 
   async getPlaylists(): Promise<Playlist[]> {
     const result = await this.request<{ playlists?: { playlist?: SubsonicPlaylist[] } }>('getPlaylists')
-    return Promise.all((result.playlists?.playlist ?? []).map(async (playlist) => ({
-      id: playlist.id,
-      name: playlist.name,
-      coverUrl: playlist.coverArt ? this.coverUrl(playlist.coverArt) : undefined,
-      tracks: await this.getPlaylistTracks(playlist.id),
-    })))
+    return Promise.all((result.playlists?.playlist ?? []).map(async (playlist) => {
+      const tracks = await this.getPlaylistTracks(playlist.id)
+      return {
+        id: playlist.id,
+        name: playlist.name,
+        coverUrl: playlist.coverArt ? this.coverUrl(playlist.coverArt) : tracks[0]?.coverUrl,
+        tracks,
+      }
+    }))
   }
 
   async getPlaylistTracks(playlistId: string): Promise<Track[]> {
