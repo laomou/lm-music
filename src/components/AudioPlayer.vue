@@ -4,18 +4,23 @@ import { usePlayerStore } from '@/stores/player'
 import { useAudioPlayer } from '@/composables/useAudioPlayer'
 import { useMediaSession } from '@/composables/useMediaSession'
 import { useAuthStore } from '@/stores/auth'
+import { useLibraryStore } from '@/stores/library'
 import { onMounted } from 'vue'
 import { t } from '@/i18n'
 
 const audio = ref<HTMLAudioElement | null>(null)
 const player = usePlayerStore()
 const auth = useAuthStore()
+const library = useLibraryStore()
 const { onTimeUpdate, onLoadedMetadata } = useAudioPlayer(audio)
 useMediaSession()
 onMounted(() => player.restorePlayback())
 
 auth.$subscribe(() => {
-  if (!auth.session) player.clearPlayback()
+  if (!auth.session) {
+    player.clearPlayback()
+    library.clear()
+  }
 })
 
 function handleError() {

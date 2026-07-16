@@ -11,6 +11,12 @@ export const useLibraryStore = defineStore('library', {
     offlinePlaylists: (state) => state.playlists.filter((playlist) => playlist.tracks.length > 0),
   },
   actions: {
+    clear() {
+      this.playlists = []
+      this.loading = false
+      this.error = ''
+      this.source = 'network'
+    },
     async fetchPlaylists() {
       this.loading = true
       this.error = ''
