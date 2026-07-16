@@ -116,6 +116,7 @@ export const useDownloadsStore = defineStore('downloads', {
     async downloadPlaylist(playlist: Playlist) {
       this.error = ''
       const auth = useAuthStore()
+      if (!playlist.tracks.length) return
       if (playlist.tracks.some((track) => track.allowOfflineDownload === false) || (auth.session && !getProviderForSession(auth.session).supportsOfflineDownload)) {
         this.error = t('error.streamingOnly')
         return
