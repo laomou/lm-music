@@ -173,14 +173,6 @@ export async function clearServerOfflineData(serverId: string, includeMetadata =
   if (includeMetadata) await deleteRecord(LIBRARY_STORE, serverId)
 }
 
-export async function getCachedAudioUrl(sourceUrl: string): Promise<string | null> {
-  const cache = await caches.open(CACHE_NAME)
-  const response = await cache.match(sourceUrl)
-  if (!response) return null
-  const blob = await response.blob()
-  return URL.createObjectURL(blob)
-}
-
 export async function requestPersistentStorage() {
   if (!navigator.storage?.persist) return false
   return navigator.storage.persist()

@@ -4,7 +4,6 @@ import {
   clearServerOfflineData,
   deleteDownloadedTrack,
   downloadTrack,
-  getCachedAudioUrl,
   getDownloadedTracks,
   getStorageEstimate,
   requestPersistentStorage,
@@ -180,10 +179,6 @@ export const useDownloadsStore = defineStore('downloads', {
       this.tasks = this.tasks.map((task) => task.status === 'downloading' ? { ...task, status: 'cancelled' } : task)
       await clearServerOfflineData(this.serverId, false)
       await this.refresh()
-    },
-    async getPlayableUrl(track: Track) {
-      const record = this.tracks.find((item) => item.trackId === track.id)
-      return record ? getCachedAudioUrl(record.audioCacheKey) : null
     },
   },
 })
