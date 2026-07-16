@@ -130,6 +130,10 @@ export const useDownloadsStore = defineStore('downloads', {
     cancel(taskId: string) {
       this.controllers.get(taskId)?.abort()
     },
+    dismissTask(taskId: string) {
+      if (this.controllers.has(taskId)) return
+      this.tasks = this.tasks.filter((task) => task.id !== taskId)
+    },
     async retry(task: DownloadTask, source: { playlist?: Playlist; track?: Track }) {
       if (task.id.startsWith('playlist:') && source.playlist) await this.downloadPlaylist(source.playlist)
       if (task.id.startsWith('track:') && source.track) await this.downloadSingle(source.track, source.playlist?.id)
