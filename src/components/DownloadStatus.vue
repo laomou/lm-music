@@ -20,22 +20,23 @@ const isComplete = computed(() => latestTask.value?.status === 'completed')
 </script>
 
 <template>
-  <button
+  <aside
     v-if="latestTask"
     class="download-status"
     :class="{ complete: isComplete }"
-    @click="router.push('/downloads')"
   >
-    <span class="download-status-icon">
-      <Check v-if="isComplete" :size="16" />
-      <Download v-else :size="16" />
-    </span>
-    <span class="download-status-copy">
-      <strong>{{ isComplete ? t('downloads.statusCompleted', { name: latestTask.label }) : t('downloads.statusDownloading', { name: latestTask.label }) }}</strong>
-      <span class="download-status-progress"><i :style="{ width: `${progress}%` }" /></span>
-      <small>{{ isComplete ? t('downloads.manage') : t('downloads.progress', { completed: latestTask.completed, total: latestTask.total, percent: progress }) }}</small>
-    </span>
-    <span v-if="latestTask.status === 'downloading'" class="download-status-cancel" role="button" :aria-label="t('downloads.cancelDownload')" @click.stop="downloads.cancel(latestTask.id)"><X :size="16" /></span>
-    <span v-else class="download-status-cancel" role="button" :aria-label="t('downloads.dismissStatus')" @click.stop="downloads.dismissTask(latestTask.id)"><X :size="16" /></span>
-  </button>
+    <button class="download-status-open" @click="router.push('/downloads')">
+      <span class="download-status-icon">
+        <Check v-if="isComplete" :size="16" />
+        <Download v-else :size="16" />
+      </span>
+      <span class="download-status-copy">
+        <strong>{{ isComplete ? t('downloads.statusCompleted', { name: latestTask.label }) : t('downloads.statusDownloading', { name: latestTask.label }) }}</strong>
+        <span class="download-status-progress"><i :style="{ width: `${progress}%` }" /></span>
+        <small>{{ isComplete ? t('downloads.manage') : t('downloads.progress', { completed: latestTask.completed, total: latestTask.total, percent: progress }) }}</small>
+      </span>
+    </button>
+    <button v-if="latestTask.status === 'downloading'" class="download-status-cancel" :aria-label="t('downloads.cancelDownload')" @click="downloads.cancel(latestTask.id)"><X :size="16" /></button>
+    <button v-else class="download-status-cancel" :aria-label="t('downloads.dismissStatus')" @click="downloads.dismissTask(latestTask.id)"><X :size="16" /></button>
+  </aside>
 </template>
