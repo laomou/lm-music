@@ -80,23 +80,24 @@ export const useDownloadsStore = defineStore('downloads', {
       if (this.isDownloaded(track.id)) return
       const task: DownloadTask = { id: `track:${track.id}`, label: track.title, completed: 0, total: 1, receivedBytes: 0, totalBytes: 0, status: 'downloading' }
       this.tasks = [...this.tasks.filter((item) => item.id !== task.id), task]
+      const currentTask = this.tasks.find((item) => item.id === task.id) ?? task
       const controller = new AbortController()
       this.controllers.set(task.id, controller)
       try {
         await requestPersistentStorage()
         await downloadTrack(this.serverId, track, playlistId, controller.signal, (receivedBytes, totalBytes) => {
-          task.receivedBytes = receivedBytes
-          task.totalBytes = totalBytes
+          currentTask.receivedBytes = receivedBytes
+          currentTask.totalBytes = totalBytes
         })
-        task.completed = 1
-        task.status = 'completed'
+        currentTask.completed = 1
+        currentTask.status = 'completed'
         await this.refresh()
       } catch (error) {
-        if (controller.signal.aborted) task.status = 'cancelled'
+        if (controller.signal.aborted) currentTask.status = 'cancelled'
         else {
-          task.status = 'failed'
-          task.error = error instanceof Error ? error.message : t('error.downloadFailed')
-          this.error = task.error
+          currentTask.status = 'failed'
+          currentTask.error = error instanceof Error ? error.message : t('error.downloadFailed')
+          this.error = currentTask.error
         }
       } finally {
         this.controllers.delete(task.id)
@@ -110,30 +111,31 @@ export const useDownloadsStore = defineStore('downloads', {
       }
       const task: DownloadTask = { id: `playlist:${playlist.id}`, label: playlist.name, completed: 0, total: playlist.tracks.length, receivedBytes: 0, totalBytes: 0, status: 'downloading' }
       this.tasks = [...this.tasks.filter((item) => item.id !== task.id), task]
+      const currentTask = this.tasks.find((item) => item.id === task.id) ?? task
       const controller = new AbortController()
       this.controllers.set(task.id, controller)
       try {
         await requestPersistentStorage()
         for (const track of playlist.tracks) {
           if (controller.signal.aborted) throw new DOMException(t('error.downloadCancelled'), 'AbortError')
-          task.receivedBytes = 0
-          task.totalBytes = 0
+          currentTask.receivedBytes = 0
+          currentTask.totalBytes = 0
           if (!this.isDownloaded(track.id)) {
             await downloadTrack(this.serverId, track, playlist.id, controller.signal, (receivedBytes, totalBytes) => {
-              task.receivedBytes = receivedBytes
-              task.totalBytes = totalBytes
+              currentTask.receivedBytes = receivedBytes
+              currentTask.totalBytes = totalBytes
             })
           }
-          task.completed += 1
+          currentTask.completed += 1
           await this.refresh()
         }
-        task.status = 'completed'
+        currentTask.status = 'completed'
       } catch (error) {
-        if (controller.signal.aborted) task.status = 'cancelled'
+        if (controller.signal.aborted) currentTask.status = 'cancelled'
         else {
-          task.status = 'failed'
-          task.error = error instanceof Error ? error.message : t('error.playlistDownloadFailed')
-          this.error = task.error
+          currentTask.status = 'failed'
+          currentTask.error = error instanceof Error ? error.message : t('error.playlistDownloadFailed')
+          this.error = currentTask.error
         }
       } finally {
         this.controllers.delete(task.id)
