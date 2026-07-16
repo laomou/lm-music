@@ -95,6 +95,7 @@ export const usePlayerStore = defineStore('player', {
     togglePlayback() {
       if (!this.currentTrack) return
       this.isPlaying = !this.isPlaying
+      if (this.isPlaying) this.error = ''
       this.persist()
     },
     setTime(time: number) {
