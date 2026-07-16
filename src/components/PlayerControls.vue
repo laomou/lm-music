@@ -7,6 +7,7 @@ import { t } from '@/i18n'
 const player = usePlayerStore()
 const canGoPrevious = computed(() => player.currentTime > 3 || player.hasPrevious)
 const canGoNext = computed(() => player.queue.length > 1 && (player.shuffle || player.hasNext || player.repeatMode === 'all'))
+const repeatLabel = computed(() => player.repeatMode === 'one' ? t('player.repeatOne') : player.repeatMode === 'all' ? t('player.repeatAll') : t('player.repeatOff'))
 </script>
 
 <template>
@@ -18,6 +19,6 @@ const canGoNext = computed(() => player.queue.length > 1 && (player.shuffle || p
       <Play v-else :size="28" fill="currentColor" />
     </button>
     <button type="button" class="icon-button" :aria-label="t('player.next')" :disabled="!canGoNext" @click="player.next()"><SkipForward /></button>
-    <button type="button" class="icon-button secondary" :class="{ active: player.repeatMode !== 'off' }" :aria-label="t('player.repeat')" :aria-pressed="player.repeatMode !== 'off'" @click="player.cycleRepeatMode()"><Repeat1 v-if="player.repeatMode === 'one'" /><Repeat2 v-else /></button>
+    <button type="button" class="icon-button secondary" :class="{ active: player.repeatMode !== 'off' }" :aria-label="repeatLabel" :aria-pressed="player.repeatMode !== 'off'" @click="player.cycleRepeatMode()"><Repeat1 v-if="player.repeatMode === 'one'" /><Repeat2 v-else /></button>
   </div>
 </template>
