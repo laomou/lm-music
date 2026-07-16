@@ -51,12 +51,17 @@ export class JellyfinClient {
       Fields: 'PrimaryImageAspectRatio,ChildCount',
     })
     const result = await this.request<JellyfinItemsResponse>(`/Users/${this.session.userId}/Items?${params}`)
-    return Promise.all(result.Items.map(async (item) => ({
-      id: item.Id,
-      name: item.Name,
-      coverUrl: this.imageUrl(item.Id, item.ImageTags?.Primary),
-      tracks: await this.getPlaylistTracks(item.Id),
-    })))
+    return Promise.all(result.Items.map(async (item) => {
+      const tracks = await this.getPlaylistTracks(item.Id)
+      return {
+        id: item.Id,
+        name: item.Name,
+        // Playlist artwork can be absent or stale in Jellyfin. Reusing the
+        // first track's album art avoids noisy 404 image requests.
+        coverUrl: tracks[0]?.coverUrl,
+        tracks,
+      }
+    }))
   }
 
   async getPlaylistTracks(playlistId: string): Promise<Track[]> {
@@ -110,7 +115,7 @@ export class JellyfinClient {
       artist: item.AlbumArtist ?? item.Artists?.join(', ') ?? t('artist.unknown'),
       album: item.Album,
       duration: Math.round((item.RunTimeTicks ?? 0) / 10_000_000),
-      coverUrl: this.imageUrl(item.Id, item.ImageTags?.Primary) ?? (item.AlbumId ? this.imageUrl(item.AlbumId, item.AlbumPrimaryImageTag) : undefined),
+      coverUrl: (item.AlbumId ? this.imageUrl(item.AlbumId, item.AlbumPrimaryImageTag) : undefined) ?? this.imageUrl(item.Id, item.ImageTags?.Primary),
       streamUrl: this.streamUrl(item.Id),
       fallbackStreamUrl: this.transcodedStreamUrl(item.Id),
       lyrics: [],

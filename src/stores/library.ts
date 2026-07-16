@@ -28,7 +28,7 @@ export const useLibraryStore = defineStore('library', {
       try {
         const cached = await getLibrary(cacheId)
         if (!isCurrentFetch()) return
-        if (cached?.playlists.length) {
+        if (cached?.playlists.length && (!auth.session || !navigator.onLine)) {
           this.playlists = cached.playlists
           this.source = 'cache'
         }
