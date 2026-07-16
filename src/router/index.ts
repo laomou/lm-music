@@ -19,6 +19,7 @@ export const router = createRouter({
     { path: '/now-playing', component: NowPlayingView },
     { path: '/settings', component: SettingsView },
     { path: '/downloads', component: DownloadsView },
+    { path: '/:pathMatch(.*)*', redirect: '/playlists' },
   ],
 })
 

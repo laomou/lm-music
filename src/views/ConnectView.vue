@@ -32,6 +32,7 @@ async function connect() {
 
 <template>
   <section class="connect-page">
+    <button v-if="auth.isConnected" class="back-button connect-back" @click="router.push('/playlists')">← 返回音乐库</button>
     <div class="brand-mark">♪</div>
     <p class="eyebrow">LM MUSIC</p>
     <h1>连接你的<br />音乐库</h1>

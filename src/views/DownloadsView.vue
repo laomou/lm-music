@@ -22,7 +22,7 @@ function sourceForTask(taskId: string): { playlist?: Playlist; track?: Track } {
 
 <template>
   <section class="page downloads-page">
-    <button class="back-button" @click="router.back()">← 返回</button>
+    <button class="back-button" @click="router.push('/playlists')">← 返回歌单</button>
     <p class="eyebrow">离线内容</p><h1>已下载</h1>
     <div class="storage-card"><div><small>浏览器缓存</small><strong>{{ formattedBytes }} 音乐</strong><span>站点已使用 {{ usage }}</span></div><button v-if="downloads.tracks.length" class="danger-button" @click="downloads.clearAll()">清除全部</button></div>
     <section v-if="downloads.tasks.length" class="tasks"><h2>下载任务</h2><div v-for="task in downloads.tasks" :key="task.id" class="task-row"><span><strong>{{ task.label }}</strong><small>{{ task.status === 'downloading' ? `正在下载 ${task.completed} / ${task.total}` : task.status === 'completed' ? '下载完成' : task.status === 'cancelled' ? '下载已取消' : task.error }}</small></span><div class="task-actions"><button v-if="task.status === 'downloading'" class="notice-muted" @click="downloads.cancel(task.id)">取消</button><button v-else-if="task.status === 'failed' || task.status === 'cancelled'" class="notice-muted" @click="downloads.retry(task, sourceForTask(task.id).playlist, sourceForTask(task.id).track)">重试</button><b>{{ task.status === 'completed' ? '✓' : task.status === 'failed' ? '!' : task.status === 'cancelled' ? '—' : `${Math.round(task.completed / task.total * 100)}%` }}</b></div></div></section>

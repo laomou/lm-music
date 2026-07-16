@@ -21,7 +21,7 @@ function seek(event: Event) {
 
 <template>
   <section v-if="track" class="page now-playing">
-    <header class="now-header"><button class="back-button" @click="router.back()">⌄</button><p>正在播放</p><span></span></header>
+    <header class="now-header"><button class="back-button" aria-label="返回歌单" @click="router.push('/playlists')">⌄</button><p>正在播放</p><span></span></header>
     <div class="player-layout">
       <div class="player-main">
         <img class="now-cover" :src="track.coverUrl" alt="" />
