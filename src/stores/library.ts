@@ -1,14 +1,54 @@
 import { defineStore } from 'pinia'
 import { getLibrary, getDownloadedTracks, saveLibrary } from '@/services/offline-storage'
 import { getProviderForSession, sessionCacheId } from '@/services/providers'
-import type { Playlist } from '@/types/music'
+import type { LibraryCollection, LibraryCollectionType, Playlist, Track } from '@/types/music'
 import { useAuthStore } from './auth'
 import { t } from '@/i18n'
+
+function collectionId(type: LibraryCollectionType, name: string) {
+  return `${type}:${encodeURIComponent(name)}`
+}
+
+function uniqueTracks(playlists: Playlist[]) {
+  const tracks = new Map<string, Track>()
+  playlists.flatMap((playlist) => playlist.tracks).forEach((track) => {
+    if (!tracks.has(track.id)) tracks.set(track.id, track)
+  })
+  return [...tracks.values()]
+}
+
+function groupTracks(type: LibraryCollectionType, tracks: Track[]): LibraryCollection[] {
+  const groups = new Map<string, Track[]>()
+  tracks.forEach((track) => {
+    const name = type === 'album' ? track.album || t('album.unknown') : track.artist || t('artist.unknown')
+    groups.set(name, [...(groups.get(name) ?? []), track])
+  })
+  return [...groups.entries()]
+    .map(([name, items]) => ({
+      id: collectionId(type, name),
+      type,
+      name,
+      subtitle: type === 'album' ? items[0]?.artist : undefined,
+      coverUrl: items[0]?.coverUrl,
+      tracks: items,
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name))
+}
 
 export const useLibraryStore = defineStore('library', {
   state: () => ({ playlists: [] as Playlist[], loading: false, error: '', source: 'network' as 'network' | 'cache', fetchToken: 0 }),
   getters: {
     offlinePlaylists: (state) => state.playlists.filter((playlist) => playlist.tracks.length > 0),
+    allTracks: (state) => uniqueTracks(state.playlists),
+    albums(): LibraryCollection[] {
+      return groupTracks('album', this.allTracks)
+    },
+    artists(): LibraryCollection[] {
+      return groupTracks('artist', this.allTracks)
+    },
+    collectionById(): (id: string) => LibraryCollection | undefined {
+      return (id: string) => [...this.albums, ...this.artists].find((collection) => collection.id === id)
+    },
   },
   actions: {
     clear() {

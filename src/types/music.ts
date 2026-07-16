@@ -26,6 +26,17 @@ export type Playlist = {
   tracks: Track[]
 }
 
+export type LibraryCollectionType = 'album' | 'artist'
+
+export type LibraryCollection = {
+  id: string
+  type: LibraryCollectionType
+  name: string
+  subtitle?: string
+  coverUrl?: string
+  tracks: Track[]
+}
+
 export type JellyfinSession = {
   provider: 'jellyfin'
   serverUrl: string
