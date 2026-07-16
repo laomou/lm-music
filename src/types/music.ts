@@ -13,6 +13,7 @@ export type Track = {
   duration: number
   coverUrl?: string
   streamUrl: string
+  fallbackStreamUrl?: string
   lyrics: LyricLine[]
   allowOfflineDownload?: boolean
 }

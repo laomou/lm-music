@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import { useAudioPlayer } from '@/composables/useAudioPlayer'
 import { useMediaSession } from '@/composables/useMediaSession'
@@ -21,9 +21,12 @@ const auth = useAuthStore()
 const library = useLibraryStore()
 const downloads = useDownloadsStore()
 const activeSessionKey = ref(sessionKey(auth.session))
+const fallbackAttempted = ref(false)
 const { onTimeUpdate, onLoadedMetadata } = useAudioPlayer(audio)
 useMediaSession()
 onMounted(() => player.restorePlayback())
+
+watch(() => player.currentTrack?.id, () => { fallbackAttempted.value = false })
 
 auth.$subscribe(() => {
   const nextSessionKey = sessionKey(auth.session)
@@ -34,7 +37,20 @@ auth.$subscribe(() => {
   downloads.clearState()
 })
 
-function handleError() {
+async function handleError() {
+  const fallbackUrl = player.currentTrack?.fallbackStreamUrl
+  if (audio.value && fallbackUrl && !fallbackAttempted.value && audio.value.src !== fallbackUrl) {
+    fallbackAttempted.value = true
+    audio.value.src = fallbackUrl
+    audio.value.currentTime = Math.min(player.currentTime, player.currentTrack?.duration ?? player.currentTime)
+    try {
+      await audio.value.play()
+      return
+    } catch {
+      // Fall through to the user-facing playback error below.
+    }
+  }
+
   const isAudius = auth.session?.provider === 'audius'
   const message = isAudius
     ? t('player.audiusError')

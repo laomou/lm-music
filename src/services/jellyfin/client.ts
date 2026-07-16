@@ -78,6 +78,19 @@ export class JellyfinClient {
     return `${this.session.serverUrl}/Audio/${trackId}/universal?${query}`
   }
 
+  transcodedStreamUrl(trackId: string) {
+    const query = new URLSearchParams({
+      api_key: this.session.accessToken,
+      userId: this.session.userId,
+      deviceId: 'lm-music-pwa',
+      static: 'false',
+      audioCodec: 'mp3',
+      transcodingContainer: 'mp3',
+      transcodingProtocol: 'http',
+    })
+    return `${this.session.serverUrl}/Audio/${trackId}/stream.mp3?${query}`
+  }
+
   async getLyrics(trackId: string): Promise<LyricLine[]> {
     const response = await fetch(`${this.session.serverUrl}/Audio/${trackId}/Lyrics`, {
       headers: { 'X-Emby-Token': this.session.accessToken },
@@ -96,6 +109,7 @@ export class JellyfinClient {
       duration: Math.round((item.RunTimeTicks ?? 0) / 10_000_000),
       coverUrl: this.imageUrl(item.Id, item.ImageTags?.Primary),
       streamUrl: this.streamUrl(item.Id),
+      fallbackStreamUrl: this.transcodedStreamUrl(item.Id),
       lyrics: [],
     }
   }
