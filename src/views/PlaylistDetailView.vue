@@ -40,7 +40,7 @@ function play(index: number) {
     <div class="track-list">
       <button v-for="(track, index) in playlist.tracks" :key="track.id" class="track-row" :class="{ current: player.currentTrack?.id === track.id }" @click="play(index)">
         <span class="track-number"><Radio v-if="player.currentTrack?.id === track.id && player.isPlaying" :size="15" />{{ player.currentTrack?.id === track.id && player.isPlaying ? '' : String(index + 1).padStart(2, '0') }}</span>
-        <img :src="track.coverUrl" alt="" /><span class="track-copy"><strong>{{ track.title }}</strong><small>{{ track.artist }}</small></span><span class="track-actions"><button v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="t('playlist.downloadTrack', { title: track.title })" :disabled="downloads.isDownloaded(track.id)" @click.stop="downloads.downloadSingle(track, playlist.id)"><Check v-if="downloads.isDownloaded(track.id)" :size="16" /><Download v-else :size="16" /></button><time>{{ formatDuration(track.duration) }}</time></span>
+        <img :src="track.coverUrl" alt="" /><span class="track-copy"><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span><span class="track-actions"><button v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="t('playlist.downloadTrack', { title: track.title })" :disabled="downloads.isDownloaded(track.id)" @click.stop="downloads.downloadSingle(track, playlist.id)"><Check v-if="downloads.isDownloaded(track.id)" :size="16" /><Download v-else :size="16" /></button><time>{{ formatDuration(track.duration) }}</time></span>
       </button>
     </div>
   </section>

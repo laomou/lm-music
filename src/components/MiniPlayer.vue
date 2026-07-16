@@ -19,7 +19,7 @@ const progressOffset = computed(() => circumference * (1 - progress.value))
 <template>
   <button v-if="player.currentTrack" class="mini-player" @click="router.push('/now-playing')">
     <img :src="player.currentTrack.coverUrl" alt="" />
-    <span class="mini-meta"><strong>{{ player.currentTrack.title }}</strong><small>{{ player.currentTrack.artist }}</small></span>
+    <span class="mini-meta"><strong :title="player.currentTrack.title">{{ player.currentTrack.title }}</strong><small :title="player.currentTrack.artist">{{ player.currentTrack.artist }}</small></span>
     <span class="mini-toggle-wrap">
       <svg class="mini-progress" viewBox="0 0 40 40" aria-hidden="true">
         <circle class="mini-progress-track" cx="20" cy="20" :r="radius" />
