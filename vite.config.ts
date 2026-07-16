@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 
 const base = process.env.BASE_PATH ?? './'
+const navigateFallback = base === './' ? 'index.html' : `${base}index.html`
 
 export default defineConfig({
   base,
@@ -35,7 +36,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        navigateFallback: '/index.html',
+        navigateFallback,
         runtimeCaching: [
           {
             // Covers can come from Jellyfin, Navidrome, or Audius CDN mirrors.
