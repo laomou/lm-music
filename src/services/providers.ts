@@ -2,6 +2,7 @@ import { AudiusClient } from '@/services/audius/client'
 import { JellyfinClient } from '@/services/jellyfin/client'
 import { NavidromeClient } from '@/services/navidrome/client'
 import type { LyricLine, MusicProviderType, MusicSession, Playlist } from '@/types/music'
+import { t } from '@/i18n'
 
 export type ProviderCredentials = {
   serverUrl?: string
@@ -17,7 +18,7 @@ export type MusicProviderClient = {
 export type MusicProvider = {
   id: MusicProviderType
   label: string
-  subtitle: string
+  subtitleKey: string
   requiresCredentials: boolean
   supportsOfflineDownload: boolean
   connect(credentials?: ProviderCredentials): Promise<MusicSession>
@@ -27,14 +28,14 @@ export type MusicProvider = {
 const jellyfin: MusicProvider = {
   id: 'jellyfin',
   label: 'Jellyfin',
-  subtitle: '个人媒体服务器',
+  subtitleKey: 'provider.jellyfinSubtitle',
   requiresCredentials: true,
   supportsOfflineDownload: true,
   async connect(credentials) {
     return JellyfinClient.login(credentials?.serverUrl ?? '', credentials?.username ?? '', credentials?.password ?? '')
   },
   createClient(session) {
-    if (session.provider !== 'jellyfin') throw new Error('Jellyfin 会话无效。')
+    if (session.provider !== 'jellyfin') throw new Error(t('provider.invalidSession', { provider: 'Jellyfin' }))
     return new JellyfinClient(session)
   },
 }
@@ -42,14 +43,14 @@ const jellyfin: MusicProvider = {
 const subsonic: MusicProvider = {
   id: 'subsonic',
   label: 'Navidrome',
-  subtitle: '兼容 OpenSubsonic',
+  subtitleKey: 'provider.navidromeSubtitle',
   requiresCredentials: true,
   supportsOfflineDownload: true,
   async connect(credentials) {
     return NavidromeClient.login(credentials?.serverUrl ?? '', credentials?.username ?? '', credentials?.password ?? '')
   },
   createClient(session) {
-    if (session.provider !== 'subsonic') throw new Error('Navidrome 会话无效。')
+    if (session.provider !== 'subsonic') throw new Error(t('provider.invalidSession', { provider: 'Navidrome' }))
     return new NavidromeClient(session)
   },
 }
@@ -57,14 +58,14 @@ const subsonic: MusicProvider = {
 const audius: MusicProvider = {
   id: 'audius',
   label: 'Audius',
-  subtitle: '公开音乐目录',
+  subtitleKey: 'provider.audiusSubtitle',
   requiresCredentials: false,
   supportsOfflineDownload: false,
   async connect() {
     return AudiusClient.connect()
   },
   createClient(session) {
-    if (session.provider !== 'audius') throw new Error('Audius 会话无效。')
+    if (session.provider !== 'audius') throw new Error(t('provider.invalidSession', { provider: 'Audius' }))
     return new AudiusClient()
   },
 }
@@ -73,8 +74,12 @@ export const musicProviders = [jellyfin, subsonic, audius] as const
 
 export function getMusicProvider(provider: MusicProviderType) {
   const definition = musicProviders.find((item) => item.id === provider)
-  if (!definition) throw new Error(`不支持的音乐来源：${provider}`)
+  if (!definition) throw new Error(t('provider.unsupported', { provider }))
   return definition
+}
+
+export function getProviderSubtitle(provider: MusicProvider) {
+  return t(provider.subtitleKey)
 }
 
 export function getProviderForSession(session: MusicSession) {

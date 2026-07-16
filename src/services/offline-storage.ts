@@ -1,4 +1,5 @@
 import type { Playlist, Track } from '@/types/music'
+import { t } from '@/i18n'
 
 const DB_NAME = 'lm-music-offline'
 const DB_VERSION = 1
@@ -121,7 +122,7 @@ async function readResponseWithProgress(response: Response, onProgress?: Downloa
 export async function downloadTrack(serverId: string, track: Track, playlistId?: string, signal?: AbortSignal, onProgress?: DownloadProgress): Promise<DownloadedTrack> {
   const cache = await caches.open(CACHE_NAME)
   const audioResponse = await fetch(track.streamUrl, { signal })
-  if (!audioResponse.ok) throw new Error(`无法下载「${track.title}」（${audioResponse.status}）`)
+  if (!audioResponse.ok) throw new Error(t('error.trackDownloadFailed', { title: track.title, status: audioResponse.status }))
   const { response: cachedAudioResponse, bytes: audioBytes } = await readResponseWithProgress(audioResponse, onProgress)
   await cache.put(track.streamUrl, cachedAudioResponse)
 

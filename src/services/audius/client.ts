@@ -1,4 +1,5 @@
 import type { AudiusSession, Playlist, Track } from '@/types/music'
+import { t } from '@/i18n'
 
 const API_URL = 'https://api.audius.co/v1'
 
@@ -26,7 +27,7 @@ type ApiResponse<T> = { data: T }
 export class AudiusClient {
   static async connect(): Promise<AudiusSession> {
     const response = await fetch(`${API_URL}/tracks/trending?limit=1`)
-    if (!response.ok) throw new Error('无法连接 Audius 公共音乐目录。')
+    if (!response.ok) throw new Error(t('error.audiusConnectFailed'))
     return { provider: 'audius', serverUrl: 'https://api.audius.co', username: 'Audius' }
   }
 
@@ -39,8 +40,8 @@ export class AudiusClient {
     const trendingTracks = tracksResult.map((track) => this.toTrack(track)).filter(Boolean) as Track[]
     return [{
       id: 'audius-trending-tracks',
-      name: 'Audius 热门单曲',
-      description: '来自 Audius 的公开音乐。仅在线播放。',
+      name: t('audius.trendingTracks'),
+      description: t('audius.publicDescription'),
       coverUrl: trendingTracks[0]?.coverUrl,
       tracks: trendingTracks,
     }, ...playlists]
@@ -52,7 +53,7 @@ export class AudiusClient {
 
   private async request<T>(path: string): Promise<T> {
     const response = await fetch(`${API_URL}${path}`)
-    if (!response.ok) throw new Error(`Audius 请求失败（${response.status}）`)
+    if (!response.ok) throw new Error(t('error.providerRequestFailed', { provider: 'Audius', status: response.status }))
     const body = await response.json() as ApiResponse<T>
     return body.data
   }
@@ -61,7 +62,7 @@ export class AudiusClient {
     return {
       id: playlist.id,
       name: playlist.playlist_name,
-      description: playlist.description ?? '来自 Audius 的公开音乐。仅在线播放。',
+      description: playlist.description ?? t('audius.publicDescription'),
       coverUrl: playlist.artwork?.['480x480'] ?? playlist.artwork?.['1000x1000'],
       tracks: (playlist.tracks ?? []).map((track) => this.toTrack(track)).filter(Boolean) as Track[],
     }
@@ -72,7 +73,7 @@ export class AudiusClient {
     return {
       id: track.id,
       title: track.title,
-      artist: track.user?.name ?? 'Audius 创作者',
+      artist: track.user?.name ?? t('audius.creator'),
       duration: track.duration ?? 0,
       coverUrl: track.artwork?.['480x480'] ?? track.artwork?.['1000x1000'],
       // Ask Audius to resolve a fresh stream URL when playback begins. The

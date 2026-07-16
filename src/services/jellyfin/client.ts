@@ -1,4 +1,5 @@
 import type { JellyfinSession, LyricLine, Playlist, Track } from '@/types/music'
+import { t } from '@/i18n'
 
 type JellyfinItem = {
   Id: string
@@ -27,7 +28,7 @@ export class JellyfinClient {
       },
       body: JSON.stringify({ Username: username, Pw: password }),
     })
-    if (!response.ok) throw new Error('无法登录 Jellyfin，请检查服务器地址、用户名和密码。')
+    if (!response.ok) throw new Error(t('error.jellyfinLoginFailed'))
     const data = await response.json() as AuthResponse
     return { provider: 'jellyfin', serverUrl: url, accessToken: data.AccessToken, userId: data.User.Id, username: data.User.Name }
   }
@@ -36,7 +37,7 @@ export class JellyfinClient {
     const response = await fetch(`${this.session.serverUrl}${path}`, {
       headers: { 'X-Emby-Token': this.session.accessToken },
     })
-    if (!response.ok) throw new Error(`Jellyfin 请求失败（${response.status}）`)
+    if (!response.ok) throw new Error(t('error.providerRequestFailed', { provider: 'Jellyfin', status: response.status }))
     return response.json() as Promise<T>
   }
 
@@ -90,7 +91,7 @@ export class JellyfinClient {
     return {
       id: item.Id,
       title: item.Name,
-      artist: item.AlbumArtist ?? item.Artists?.join(', ') ?? '未知艺术家',
+      artist: item.AlbumArtist ?? item.Artists?.join(', ') ?? t('artist.unknown'),
       album: item.Album,
       duration: Math.round((item.RunTimeTicks ?? 0) / 10_000_000),
       coverUrl: this.imageUrl(item.Id, item.ImageTags?.Primary),

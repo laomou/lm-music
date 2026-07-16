@@ -1,4 +1,5 @@
 import type { LyricLine, Playlist, SubsonicSession, Track } from '@/types/music'
+import { t } from '@/i18n'
 
 type SubsonicResponse<T> = {
   'subsonic-response': T & { status: 'ok' | 'failed'; error?: { message?: string } }
@@ -63,10 +64,10 @@ export class NavidromeClient {
     const query = this.authParams()
     Object.entries(params).forEach(([key, value]) => query.set(key, value))
     const response = await fetch(`${this.session.serverUrl}/rest/${endpoint}.view?${query}`)
-    if (!response.ok) throw new Error(`Navidrome 请求失败（${response.status}）`)
+    if (!response.ok) throw new Error(t('error.providerRequestFailed', { provider: 'Navidrome', status: response.status }))
     const body = await response.json() as SubsonicResponse<T>
     const result = body['subsonic-response']
-    if (result.status !== 'ok') throw new Error(result.error?.message ?? 'Navidrome 拒绝了该请求。')
+    if (result.status !== 'ok') throw new Error(result.error?.message ?? t('error.navidromeRejected'))
     return result
   }
 
@@ -110,7 +111,7 @@ export class NavidromeClient {
     return {
       id: song.id,
       title: song.title,
-      artist: song.artist ?? '未知艺术家',
+      artist: song.artist ?? t('artist.unknown'),
       album: song.album,
       duration: song.duration ?? 0,
       coverUrl: song.coverArt ? this.coverUrl(song.coverArt) : undefined,

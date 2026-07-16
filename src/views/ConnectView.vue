@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { getMusicProvider, musicProviders } from '@/services/providers'
+import { getMusicProvider, getProviderSubtitle, musicProviders } from '@/services/providers'
 import { useAuthStore } from '@/stores/auth'
 import type { MusicProviderType } from '@/types/music'
 import { ArrowLeft } from '@lucide/vue'
@@ -45,7 +45,7 @@ async function connect() {
     <h1 v-html="t('connect.title')" />
     <p class="muted">{{ t('connect.description') }}</p>
     <form class="connect-form" @submit.prevent="connect">
-      <fieldset class="provider-picker"><legend>{{ t('connect.source') }}</legend><label v-for="source in musicProviders" :key="source.id" :class="{ selected: provider === source.id, 'audius-option': source.id === 'audius' }"><input v-model="provider" type="radio" :value="source.id" /><span><strong>{{ source.label }}</strong><small>{{ source.subtitle }}</small></span></label></fieldset>
+      <fieldset class="provider-picker"><legend>{{ t('connect.source') }}</legend><label v-for="source in musicProviders" :key="source.id" :class="{ selected: provider === source.id, 'audius-option': source.id === 'audius' }"><input v-model="provider" type="radio" :value="source.id" /><span><strong>{{ source.label }}</strong><small>{{ getProviderSubtitle(source) }}</small></span></label></fieldset>
       <template v-if="getMusicProvider(provider).requiresCredentials"><label>{{ t('connect.serverUrl') }}<input v-model.trim="serverUrl" required type="url" :placeholder="provider === 'jellyfin' ? 'https://jellyfin.example.com' : 'https://music.example.com'" /></label><label>{{ t('connect.username') }}<input v-model.trim="username" required autocomplete="username" :placeholder="t('connect.username')" /></label><label>{{ t('connect.password') }}<input v-model="password" required type="password" autocomplete="current-password" :placeholder="t('connect.password')" /></label></template>
       <p v-else class="provider-description">{{ t('connect.audiusDescription') }}</p>
       <p v-if="error" class="form-error">{{ error }}</p>
