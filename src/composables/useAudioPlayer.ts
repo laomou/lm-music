@@ -1,8 +1,9 @@
-import { onBeforeUnmount, watch, type Ref } from 'vue'
+import { onBeforeUnmount, onMounted, watch, type Ref } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 
 export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
   const player = usePlayerStore()
+  const persistPlayback = () => player.persist()
 
   async function loadSource() {
     if (!audio.value || !player.currentTrack) return
@@ -32,7 +33,19 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
   watch([() => player.volume, () => player.muted], ([volume, muted]) => {
     if (audio.value) audio.value.volume = muted ? 0 : volume
   }, { immediate: true })
-  onBeforeUnmount(() => undefined)
+  onMounted(() => {
+    window.addEventListener('beforeunload', persistPlayback)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+  })
+  onBeforeUnmount(() => {
+    window.removeEventListener('beforeunload', persistPlayback)
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
+    persistPlayback()
+  })
+
+  function handleVisibilityChange() {
+    if (document.visibilityState === 'hidden') persistPlayback()
+  }
 
   function onTimeUpdate() { if (audio.value) player.setTime(audio.value.currentTime) }
   function onLoadedMetadata() {

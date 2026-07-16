@@ -33,6 +33,7 @@ export const usePlayerStore = defineStore('player', {
       queue: [] as Track[],
       currentIndex: -1,
       currentTime: saved.currentTime ?? 0,
+      lastPersistedTime: saved.currentTime ?? 0,
       duration: 0,
       isPlaying: false,
       volume: saved.volume ?? 0.8,
@@ -49,6 +50,7 @@ export const usePlayerStore = defineStore('player', {
   },
   actions: {
     persist() {
+      this.lastPersistedTime = this.currentTime
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         currentTrack: this.currentTrack,
         queue: this.queue,
@@ -96,8 +98,11 @@ export const usePlayerStore = defineStore('player', {
       this.persist()
     },
     setTime(time: number) {
-      this.currentTime = time
-      this.persist()
+      this.currentTime = Math.max(0, time)
+      // Audio timeupdate fires several times per second. Persisting every
+      // event makes playback needlessly write to localStorage, so save at a
+      // useful cadence and always flush on pause/visibility changes.
+      if (Math.abs(this.currentTime - this.lastPersistedTime) >= 2) this.persist()
     },
     setDuration(duration: number) {
       this.duration = duration
