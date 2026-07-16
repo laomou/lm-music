@@ -36,7 +36,7 @@ function playRecent(trackId: string) {
   <section class="page playlists-page">
     <header class="topbar"><div><p class="eyebrow">LM MUSIC</p><h1>{{ t('library.title') }}</h1></div><div class="header-actions"><button type="button" class="settings-button" :aria-label="t('common.downloads')" @click="openDownloads"><Download /></button><button type="button" class="settings-button" :aria-label="t('common.settings')" @click="router.push('/settings')"><Settings /></button></div></header>
 
-    <button type="button" v-if="player.currentTrack" class="resume-card" @click="resume">
+    <button type="button" v-if="player.currentTrack" class="resume-card" :aria-label="t('library.resumeTrack', { title: player.currentTrack.title })" @click="resume">
       <CoverImage :src="player.currentTrack.coverUrl" alt="" />
       <span><small>{{ t('library.continue') }}</small><strong>{{ player.currentTrack.title }}</strong><em>{{ player.currentTrack.artist }}</em></span><b><Play :size="15" fill="currentColor" /></b>
     </button>
