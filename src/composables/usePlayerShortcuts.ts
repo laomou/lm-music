@@ -24,6 +24,13 @@ export function usePlayerShortcuts() {
       event.preventDefault()
       const offset = event.key === 'ArrowLeft' ? -5 : 5
       player.setTime(Math.max(0, Math.min(player.duration || player.currentTrack.duration, player.currentTime + offset)))
+      return
+    }
+
+    if (event.code === 'KeyM') {
+      if (!player.currentTrack) return
+      event.preventDefault()
+      player.toggleMuted()
     }
   }
 
