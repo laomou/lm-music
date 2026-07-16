@@ -81,6 +81,10 @@ export const usePlayerStore = defineStore('player', {
         ...this.recentTracks.filter((item) => item.id !== track.id),
       ].slice(0, 12)
     },
+    clearRecentTracks() {
+      this.recentTracks = []
+      this.persist()
+    },
     play(track: Track, queue: Track[], startTime = 0) {
       this.error = ''
       this.queue = queue
