@@ -12,10 +12,10 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
     // may reject playback if an async cache lookup happens before audio.play().
     // Downloaded audio is served from the service worker's CacheFirst route.
     audio.value.src = player.currentTrack.streamUrl
-    audio.value.currentTime = player.currentTime
+    audio.value.currentTime = Math.min(player.currentTime, player.currentTrack.duration)
 
     if (player.isPlaying) {
-      try { await audio.value.play() } catch { player.isPlaying = false }
+      try { await audio.value.play() } catch { player.togglePlayback() }
     }
   }
 
@@ -25,7 +25,9 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
     try {
       if (playing) await audio.value.play()
       else audio.value.pause()
-    } catch { player.isPlaying = false }
+    } catch {
+      if (player.isPlaying) player.togglePlayback()
+    }
   })
   watch(() => player.currentTime, (time) => {
     if (audio.value && Math.abs(audio.value.currentTime - time) > 1.2) audio.value.currentTime = time
@@ -51,7 +53,9 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
   function onLoadedMetadata() {
     if (!audio.value) return
     player.setDuration(Number.isFinite(audio.value.duration) ? audio.value.duration : player.currentTrack?.duration ?? 0)
-    audio.value.currentTime = player.currentTime
+    const resumedTime = Math.min(player.currentTime, player.duration)
+    if (resumedTime !== player.currentTime) player.setTime(resumedTime)
+    audio.value.currentTime = resumedTime
   }
 
   return { onTimeUpdate, onLoadedMetadata }

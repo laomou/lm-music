@@ -183,6 +183,7 @@ export const usePlayerStore = defineStore('player', {
     setError(message: string) {
       this.error = message
       this.isPlaying = false
+      this.persist()
     },
     clearError() {
       this.error = ''
