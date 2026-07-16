@@ -1,12 +1,11 @@
 import { defineStore } from 'pinia'
 import { JellyfinClient } from '@/services/jellyfin/client'
-import { mockPlaylists } from '@/services/mock-library'
 import { getLibrary, getDownloadedTracks, saveLibrary, serverCacheId } from '@/services/offline-storage'
 import type { Playlist } from '@/types/music'
 import { useAuthStore } from './auth'
 
 export const useLibraryStore = defineStore('library', {
-  state: () => ({ playlists: [] as Playlist[], loading: false, error: '', source: 'network' as 'network' | 'cache' | 'demo' }),
+  state: () => ({ playlists: [] as Playlist[], loading: false, error: '', source: 'network' as 'network' | 'cache' }),
   getters: {
     offlinePlaylists: (state) => state.playlists.filter((playlist) => playlist.tracks.length > 0),
   },
@@ -20,12 +19,10 @@ export const useLibraryStore = defineStore('library', {
         const cached = await getLibrary(cacheId)
         if (cached?.playlists.length) {
           this.playlists = cached.playlists
-          this.source = auth.session ? 'cache' : 'demo'
+          this.source = 'cache'
         }
         if (!auth.session) {
-          this.playlists = mockPlaylists
-          this.source = 'demo'
-          await saveLibrary(cacheId, this.playlists)
+          if (!this.playlists.length) throw new Error('请先连接 Jellyfin 服务器。')
           return
         }
         if (!navigator.onLine) {

@@ -5,6 +5,7 @@ import PlaylistDetailView from '@/views/PlaylistDetailView.vue'
 import NowPlayingView from '@/views/NowPlayingView.vue'
 import SettingsView from '@/views/SettingsView.vue'
 import DownloadsView from '@/views/DownloadsView.vue'
+import { useAuthStore } from '@/stores/auth'
 
 export const router = createRouter({
   // GitHub Pages cannot rewrite arbitrary SPA paths to index.html.
@@ -19,4 +20,11 @@ export const router = createRouter({
     { path: '/settings', component: SettingsView },
     { path: '/downloads', component: DownloadsView },
   ],
+})
+
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  if (to.path !== '/connect' && !auth.isConnected && to.path !== '/playlists') {
+    return '/connect'
+  }
 })

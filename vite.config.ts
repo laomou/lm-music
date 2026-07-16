@@ -40,6 +40,13 @@ export default defineConfig({
             handler: 'NetworkFirst',
             options: { cacheName: 'lm-music-lyrics', networkTimeoutSeconds: 4, expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 } },
           },
+          {
+            // Explicit downloads are written to this cache. This route makes
+            // the same Jellyfin stream URL available while the device is offline.
+            urlPattern: ({ url }) => url.pathname.includes('/Audio/'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'lm-music-media-v1', expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 90 } },
+          },
         ],
       },
     }),

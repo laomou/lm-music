@@ -40,6 +40,5 @@ async function connect() {
       <p v-if="error" class="form-error">{{ error }}</p>
       <button class="primary-button" :disabled="loading">{{ loading ? '正在连接…' : '连接 Jellyfin' }}</button>
     </form>
-    <button class="text-button" @click="router.push('/playlists')">先体验本地演示</button>
   </section>
 </template>

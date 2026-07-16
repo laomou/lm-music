@@ -1,21 +1,18 @@
 import { onBeforeUnmount, watch, type Ref } from 'vue'
-import { useDownloadsStore } from '@/stores/downloads'
 import { usePlayerStore } from '@/stores/player'
 
 export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
   const player = usePlayerStore()
-  const downloads = useDownloadsStore()
-  let objectUrl: string | null = null
 
   async function loadSource() {
     if (!audio.value || !player.currentTrack) return
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl)
-      objectUrl = null
-    }
-    objectUrl = await downloads.getPlayableUrl(player.currentTrack)
-    audio.value.src = objectUrl ?? player.currentTrack.streamUrl
+
+    // Keep this synchronous: a song selection is a user gesture, and browsers
+    // may reject playback if an async cache lookup happens before audio.play().
+    // Downloaded audio is served from the service worker's CacheFirst route.
+    audio.value.src = player.currentTrack.streamUrl
     audio.value.currentTime = player.currentTime
+
     if (player.isPlaying) {
       try { await audio.value.play() } catch { player.isPlaying = false }
     }
@@ -35,7 +32,7 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
   watch([() => player.volume, () => player.muted], ([volume, muted]) => {
     if (audio.value) audio.value.volume = muted ? 0 : volume
   }, { immediate: true })
-  onBeforeUnmount(() => { if (objectUrl) URL.revokeObjectURL(objectUrl) })
+  onBeforeUnmount(() => undefined)
 
   function onTimeUpdate() { if (audio.value) player.setTime(audio.value.currentTime) }
   function onLoadedMetadata() {
