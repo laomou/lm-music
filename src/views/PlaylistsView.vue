@@ -41,6 +41,11 @@ const artists = computed(() => {
   const query = normalizedSearch.value
   return query ? library.artists.filter((artist) => artist.name.toLowerCase().includes(query)) : library.artists
 })
+const matchingTracks = computed(() => {
+  const query = normalizedSearch.value
+  if (!query) return []
+  return library.allTracks.filter((track) => `${track.title} ${track.artist} ${track.album ?? ''}`.toLowerCase().includes(query)).slice(0, 24)
+})
 
 function openDownloads() { router.push('/downloads') }
 
@@ -64,6 +69,13 @@ function playCollection(tracks: typeof library.allTracks) {
   router.push('/now-playing')
 }
 
+function playSearchTrack(trackId: string) {
+  const track = matchingTracks.value.find((item) => item.id === trackId)
+  if (!track) return
+  player.play(track, matchingTracks.value)
+  router.push('/now-playing')
+}
+
 function openCollection(id: string) {
   router.push(`/collection/${id}`)
 }
@@ -83,6 +95,13 @@ function clearRecent() {
     </button>
 
     <label class="library-search"><span>{{ t('library.searchPlaceholder') }}</span><input v-model="search" type="search" :placeholder="t('library.searchPlaceholder')" /></label>
+
+    <div v-if="matchingTracks.length" class="section-heading"><h2>{{ t('library.matchingTracks') }}</h2></div>
+    <div v-if="matchingTracks.length" class="recent-tracks">
+      <button type="button" v-for="track in matchingTracks" :key="track.id" class="recent-track" :aria-current="player.currentTrack?.id === track.id ? 'true' : undefined" :aria-label="player.currentTrack?.id === track.id ? t('player.currentlyPlaying', { title: track.title }) : t('playlist.playTrack', { title: track.title })" @click="playSearchTrack(track.id)">
+        <CoverImage :src="track.coverUrl" alt="" /><span><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span><Play :size="16" fill="currentColor" />
+      </button>
+    </div>
 
     <div v-if="showCollections" class="library-tabs" role="tablist" :aria-label="t('library.title')">
       <button type="button" role="tab" :aria-selected="viewMode === 'playlists'" :class="{ active: viewMode === 'playlists' }" @click="viewMode = 'playlists'">{{ t('library.playlistTab') }}</button>
