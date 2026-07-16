@@ -12,6 +12,7 @@ export const useLibraryStore = defineStore('library', {
   },
   actions: {
     clear() {
+      this.fetchToken += 1
       this.playlists = []
       this.loading = false
       this.error = ''
