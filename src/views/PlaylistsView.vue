@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useLibraryStore } from '@/stores/library'
@@ -13,7 +13,19 @@ const router = useRouter()
 const auth = useAuthStore()
 const library = useLibraryStore()
 const player = usePlayerStore()
+const search = ref('')
 const providerLabel = computed(() => auth.session ? getProviderForSession(auth.session).label : '')
+const normalizedSearch = computed(() => search.value.trim().toLowerCase())
+const recentTracks = computed(() => {
+  const query = normalizedSearch.value
+  const tracks = player.recentTracks.slice(0, 6)
+  return query ? tracks.filter((track) => `${track.title} ${track.artist}`.toLowerCase().includes(query)) : tracks
+})
+const playlists = computed(() => {
+  const query = normalizedSearch.value
+  if (!query) return library.playlists
+  return library.playlists.filter((playlist) => `${playlist.name} ${playlist.tracks.map((track) => `${track.title} ${track.artist}`).join(' ')}`.toLowerCase().includes(query))
+})
 
 function openDownloads() { router.push('/downloads') }
 
@@ -41,22 +53,24 @@ function playRecent(trackId: string) {
       <span><small>{{ t('library.continue') }}</small><strong :title="player.currentTrack.title">{{ player.currentTrack.title }}</strong><em :title="player.currentTrack.artist">{{ player.currentTrack.artist }}</em></span><b><Play :size="15" fill="currentColor" /></b>
     </button>
 
-    <div v-if="player.recentTracks.length" class="section-heading"><h2>{{ t('library.recent') }}</h2></div>
-    <div v-if="player.recentTracks.length" class="recent-tracks">
-      <button type="button" v-for="track in player.recentTracks.slice(0, 6)" :key="track.id" class="recent-track" :aria-current="player.currentTrack?.id === track.id ? 'true' : undefined" :aria-label="player.currentTrack?.id === track.id ? t('player.currentlyPlaying', { title: track.title }) : t('playlist.playTrack', { title: track.title })" @click="playRecent(track.id)">
+    <label class="library-search"><span>{{ t('library.searchPlaceholder') }}</span><input v-model="search" type="search" :placeholder="t('library.searchPlaceholder')" /></label>
+
+    <div v-if="recentTracks.length" class="section-heading"><h2>{{ t('library.recent') }}</h2></div>
+    <div v-if="recentTracks.length" class="recent-tracks">
+      <button type="button" v-for="track in recentTracks" :key="track.id" class="recent-track" :aria-current="player.currentTrack?.id === track.id ? 'true' : undefined" :aria-label="player.currentTrack?.id === track.id ? t('player.currentlyPlaying', { title: track.title }) : t('playlist.playTrack', { title: track.title })" @click="playRecent(track.id)">
         <CoverImage :src="track.coverUrl" alt="" /><span><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span><Play :size="16" fill="currentColor" />
       </button>
     </div>
 
     <div class="section-heading"><h2>{{ auth.isConnected ? t('library.playlists', { provider: providerLabel }) : t('library.offlinePlaylists') }}</h2><span v-if="library.loading">{{ t('common.loading') }}</span></div>
     <p v-if="library.error" class="form-error" role="alert">{{ library.error }}</p>
-    <div v-if="library.playlists.length" class="playlist-grid">
-      <button type="button" v-for="playlist in library.playlists" :key="playlist.id" class="playlist-card" :aria-label="t('library.openPlaylist', { name: playlist.name })" @click="router.push(`/playlist/${playlist.id}`)">
+    <div v-if="playlists.length" class="playlist-grid">
+      <button type="button" v-for="playlist in playlists" :key="playlist.id" class="playlist-card" :aria-label="t('library.openPlaylist', { name: playlist.name })" @click="router.push(`/playlist/${playlist.id}`)">
         <CoverImage :src="playlist.coverUrl" alt="" />
         <span><strong :title="playlist.name">{{ playlist.name }}</strong><small>{{ t('library.trackCount', { count: playlist.tracks.length }) }}</small></span>
       </button>
     </div>
-    <div v-else-if="!library.loading" class="empty-state"><p>{{ auth.isConnected ? t('library.emptyConnected') : t('library.emptyDisconnected') }}</p><button type="button" v-if="!auth.isConnected" class="primary-button" @click="router.push('/connect')">{{ t('library.connect') }}</button></div>
+    <div v-else-if="!library.loading" class="empty-state"><p>{{ normalizedSearch ? t('library.noSearchResults') : auth.isConnected ? t('library.emptyConnected') : t('library.emptyDisconnected') }}</p><button type="button" v-if="!auth.isConnected && !normalizedSearch" class="primary-button" @click="router.push('/connect')">{{ t('library.connect') }}</button></div>
 
     <div v-if="!auth.isConnected && library.playlists.length" class="connect-note"><span>{{ t('library.offlineNotice') }}</span><button type="button" class="text-button" @click="router.push('/connect')">{{ t('library.connect') }}</button></div>
   </section>
