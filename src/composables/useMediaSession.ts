@@ -4,13 +4,14 @@ import { usePlayerStore } from '@/stores/player'
 
 export function useMediaSession() {
   const player = usePlayerStore()
+  const fallbackArtwork = `${import.meta.env.BASE_URL}icon-512.png`
   if (!('mediaSession' in navigator)) return
   watch(() => player.currentTrack, (track: Track | null) => {
     if (!track) {
       navigator.mediaSession.metadata = null
       return
     }
-    navigator.mediaSession.metadata = new MediaMetadata({ title: track.title, artist: track.artist, album: track.album, artwork: track.coverUrl ? [{ src: track.coverUrl, sizes: '512x512' }] : [] })
+    navigator.mediaSession.metadata = new MediaMetadata({ title: track.title, artist: track.artist, album: track.album, artwork: [{ src: track.coverUrl || fallbackArtwork, sizes: '512x512', type: 'image/png' }] })
   }, { immediate: true })
   watch(() => player.isPlaying, (isPlaying) => { navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused' })
   watch(
