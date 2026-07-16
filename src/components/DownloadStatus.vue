@@ -32,7 +32,13 @@ const isComplete = computed(() => latestTask.value?.status === 'completed')
       </span>
       <span class="download-status-copy">
         <strong>{{ isComplete ? t('downloads.statusCompleted', { name: latestTask.label }) : t('downloads.statusDownloading', { name: latestTask.label }) }}</strong>
-        <span class="download-status-progress"><i :style="{ width: `${progress}%` }" /></span>
+        <span
+          class="download-status-progress"
+          role="progressbar"
+          :aria-valuemin="0"
+          :aria-valuemax="100"
+          :aria-valuenow="progress"
+        ><i :style="{ width: `${progress}%` }" /></span>
         <small>{{ isComplete ? t('downloads.manage') : t('downloads.progress', { completed: latestTask.completed, total: latestTask.total, percent: progress }) }}</small>
       </span>
     </button>
