@@ -6,6 +6,8 @@ type JellyfinItem = {
   Name: string
   RunTimeTicks?: number
   Album?: string
+  AlbumId?: string
+  AlbumPrimaryImageTag?: string
   AlbumArtist?: string
   Artists?: string[]
   ImageTags?: { Primary?: string }
@@ -64,8 +66,9 @@ export class JellyfinClient {
   }
 
   imageUrl(itemId: string, tag?: string) {
+    if (!tag) return undefined
     const query = new URLSearchParams({ maxWidth: '800', quality: '90', api_key: this.session.accessToken })
-    if (tag) query.set('tag', tag)
+    query.set('tag', tag)
     return `${this.session.serverUrl}/Items/${itemId}/Images/Primary?${query}`
   }
 
@@ -107,7 +110,7 @@ export class JellyfinClient {
       artist: item.AlbumArtist ?? item.Artists?.join(', ') ?? t('artist.unknown'),
       album: item.Album,
       duration: Math.round((item.RunTimeTicks ?? 0) / 10_000_000),
-      coverUrl: this.imageUrl(item.Id, item.ImageTags?.Primary),
+      coverUrl: this.imageUrl(item.Id, item.ImageTags?.Primary) ?? (item.AlbumId ? this.imageUrl(item.AlbumId, item.AlbumPrimaryImageTag) : undefined),
       streamUrl: this.streamUrl(item.Id),
       fallbackStreamUrl: this.transcodedStreamUrl(item.Id),
       lyrics: [],
