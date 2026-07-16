@@ -11,7 +11,10 @@ import { t } from '@/i18n'
 const router = useRouter()
 const downloads = useDownloadsStore()
 const library = useLibraryStore()
-onMounted(() => downloads.refresh())
+onMounted(() => {
+  downloads.refresh()
+  if (!library.playlists.length) library.fetchPlaylists()
+})
 
 function sourceForTask(taskId: string): { playlist?: Playlist; track?: Track } {
   if (taskId.startsWith('playlist:')) return { playlist: library.playlists.find((item) => item.id === taskId.slice('playlist:'.length)) }
