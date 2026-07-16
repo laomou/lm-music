@@ -1,6 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
-
-:root { color-scheme: dark; font-family: 'DM Sans','Noto Sans SC',sans-serif; color: #f7f5ff; background: #0b0c12; font-synthesis: none; }
+:root { color-scheme: dark; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'Microsoft YaHei', sans-serif; color: #f7f5ff; background: #0b0c12; font-synthesis: none; }
 * { box-sizing: border-box; } body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 80% -10%, #3b2d6b 0, transparent 34rem), #0b0c12; } button,input { font: inherit; } button { color: inherit; cursor: pointer; } button:disabled { cursor: not-allowed; opacity: .45; } button:focus-visible,input:focus-visible,select:focus-visible,.skip-link:focus-visible { outline: 2px solid #c8b9ff; outline-offset: 3px; }.skip-link { position: fixed; z-index: 100; top: 10px; left: 50%; padding: 9px 13px; border-radius: 10px; color: #1b172b; background: #d1c4ff; transform: translate(-50%,-160%); transition: transform .18s ease; }.skip-link:focus { transform: translate(-50%,0); }
 .app-shell { width: min(100%, 1120px); min-height: 100vh; margin: auto; padding: 28px 24px calc(104px + env(safe-area-inset-bottom)); } .connect-shell { display: grid; place-items: center; }
 .page { animation: enter .35s ease both; } @keyframes enter { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
