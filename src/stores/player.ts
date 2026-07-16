@@ -34,6 +34,7 @@ export const usePlayerStore = defineStore('player', {
       muted: saved.muted ?? false,
       shuffle: saved.shuffle ?? false,
       repeatMode: saved.repeatMode ?? 'off' as RepeatMode,
+      error: '',
     }
   },
   getters: {
@@ -52,6 +53,7 @@ export const usePlayerStore = defineStore('player', {
       }))
     },
     play(track: Track, queue: Track[], startTime = 0) {
+      this.error = ''
       this.queue = queue
       this.currentIndex = Math.max(queue.findIndex((item) => item.id === track.id), 0)
       this.currentTrack = queue[this.currentIndex] ?? track
@@ -130,6 +132,13 @@ export const usePlayerStore = defineStore('player', {
         return
       }
       this.next()
+    },
+    setError(message: string) {
+      this.error = message
+      this.isPlaying = false
+    },
+    clearError() {
+      this.error = ''
     },
   },
 })

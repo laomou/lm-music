@@ -90,16 +90,16 @@ export async function getLibrary(serverId: string) {
   return getRecord<StoredLibrary>(LIBRARY_STORE, serverId)
 }
 
-export async function downloadTrack(serverId: string, track: Track, playlistId?: string): Promise<DownloadedTrack> {
+export async function downloadTrack(serverId: string, track: Track, playlistId?: string, signal?: AbortSignal): Promise<DownloadedTrack> {
   const cache = await caches.open(CACHE_NAME)
-  const audioResponse = await fetch(track.streamUrl)
+  const audioResponse = await fetch(track.streamUrl, { signal })
   if (!audioResponse.ok) throw new Error(`无法下载「${track.title}」（${audioResponse.status}）`)
   const audioBytes = Number(audioResponse.headers.get('content-length')) || (await audioResponse.clone().blob()).size
   await cache.put(track.streamUrl, audioResponse.clone())
 
   let coverCacheKey: string | undefined
   if (track.coverUrl) {
-    const coverResponse = await fetch(track.coverUrl)
+    const coverResponse = await fetch(track.coverUrl, { signal })
     if (coverResponse.ok) {
       await cache.put(track.coverUrl, coverResponse.clone())
       coverCacheKey = track.coverUrl

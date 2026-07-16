@@ -26,6 +26,7 @@ function seek(event: Event) {
       <div class="player-main">
         <img class="now-cover" :src="track.coverUrl" alt="" />
         <div class="now-track"><div><h1>{{ track.title }}</h1><p>{{ track.artist }}</p></div><button class="heart-button" aria-label="喜欢">♡</button></div>
+        <div v-if="player.error" class="playback-error"><span>{{ player.error }}</span><button @click="player.togglePlayback()">重试</button></div>
         <div class="progress-wrap"><input :value="player.currentTime" type="range" min="0" :max="player.duration || track.duration" step="0.1" aria-label="播放进度" @input="seek" /><div><time>{{ formatDuration(player.currentTime) }}</time><time>{{ formatDuration(player.duration || track.duration) }}</time></div></div>
         <PlayerControls />
         <div class="volume-row"><span>{{ player.muted || player.volume === 0 ? '◌' : '◖' }}</span><input :value="player.muted ? 0 : player.volume" type="range" min="0" max="1" step="0.01" aria-label="音量" @input="player.setVolume(Number(($event.target as HTMLInputElement).value))" /><button @click="player.toggleMuted()">{{ player.muted ? '取消静音' : '静音' }}</button></div>
