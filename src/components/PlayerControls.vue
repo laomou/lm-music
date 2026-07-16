@@ -10,7 +10,7 @@ const canGoNext = computed(() => player.queue.length > 1 && (player.shuffle || p
 </script>
 
 <template>
-  <div class="player-controls" :aria-label="t('player.nowPlaying')">
+  <div class="player-controls" role="toolbar" :aria-label="t('player.nowPlaying')">
     <button type="button" class="icon-button secondary" :class="{ active: player.shuffle }" :aria-label="t('player.shuffle')" :aria-pressed="player.shuffle" :disabled="player.queue.length < 2" @click="player.toggleShuffle()"><Shuffle /></button>
     <button type="button" class="icon-button" :aria-label="t('player.previous')" :disabled="!canGoPrevious" @click="player.previous()"><SkipBack /></button>
     <button type="button" class="play-button" :aria-label="player.isPlaying ? t('player.pause') : t('player.play')" :aria-pressed="player.isPlaying" @click="player.togglePlayback()">
