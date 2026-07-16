@@ -5,6 +5,7 @@ import { useAudioPlayer } from '@/composables/useAudioPlayer'
 import { useMediaSession } from '@/composables/useMediaSession'
 import { useAuthStore } from '@/stores/auth'
 import { useLibraryStore } from '@/stores/library'
+import { useDownloadsStore } from '@/stores/downloads'
 import { t } from '@/i18n'
 import type { MusicSession } from '@/types/music'
 
@@ -16,6 +17,7 @@ const audio = ref<HTMLAudioElement | null>(null)
 const player = usePlayerStore()
 const auth = useAuthStore()
 const library = useLibraryStore()
+const downloads = useDownloadsStore()
 const activeSessionKey = ref(sessionKey(auth.session))
 const { onTimeUpdate, onLoadedMetadata } = useAudioPlayer(audio)
 useMediaSession()
@@ -27,6 +29,7 @@ auth.$subscribe(() => {
   activeSessionKey.value = nextSessionKey
   player.clearPlayback()
   library.clear()
+  downloads.clearState()
 })
 
 function handleError() {

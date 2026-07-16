@@ -45,6 +45,17 @@ export const useDownloadsStore = defineStore('downloads', {
     taskFor: (state) => (id: string) => state.tasks.find((task) => task.id === id),
   },
   actions: {
+    clearState() {
+      this.controllers.forEach((controller) => controller.abort())
+      this.controllers.clear()
+      this.tracks = []
+      this.totalBytes = 0
+      this.tasks = []
+      this.loading = false
+      this.error = ''
+      this.storageUsage = 0
+      this.storageQuota = 0
+    },
     async refresh() {
       this.loading = true
       try {
