@@ -1,5 +1,5 @@
 export function formatBytes(bytes: number) {
-  if (!Number.isFinite(bytes) || bytes <= 0) return '0 MB'
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 KB'
 
   const units = ['KB', 'MB', 'GB', 'TB']
   const kilobytes = Math.max(bytes / 1024, 1)
