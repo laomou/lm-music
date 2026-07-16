@@ -62,7 +62,8 @@ export class JellyfinClient {
         tracks,
       }
     }))
-    if (playlists.some((playlist) => playlist.tracks.length)) return playlists
+    const playablePlaylists = playlists.filter((playlist) => playlist.tracks.length > 0)
+    if (playablePlaylists.length) return playablePlaylists
 
     const tracks = await this.getAllTracks()
     return tracks.length ? [{
