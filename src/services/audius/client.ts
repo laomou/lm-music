@@ -1,0 +1,83 @@
+import type { AudiusSession, Playlist, Track } from '@/types/music'
+
+const API_URL = 'https://api.audius.co/v1'
+
+type AudiusArtwork = { '480x480'?: string; '1000x1000'?: string }
+type AudiusTrack = {
+  id: string
+  title: string
+  duration?: number
+  is_streamable?: boolean
+  artwork?: AudiusArtwork
+  stream?: { url?: string }
+  user?: { name?: string }
+}
+
+type AudiusPlaylist = {
+  id: string
+  playlist_name: string
+  description?: string | null
+  artwork?: AudiusArtwork
+  tracks?: AudiusTrack[]
+}
+
+type ApiResponse<T> = { data: T }
+
+export class AudiusClient {
+  static async connect(): Promise<AudiusSession> {
+    const response = await fetch(`${API_URL}/tracks/trending?limit=1`)
+    if (!response.ok) throw new Error('无法连接 Audius 公共音乐目录。')
+    return { provider: 'audius', serverUrl: 'https://api.audius.co', username: 'Audius' }
+  }
+
+  async getPlaylists(): Promise<Playlist[]> {
+    const [playlistResult, tracksResult] = await Promise.all([
+      this.request<AudiusPlaylist[]>('/playlists/trending?limit=20'),
+      this.request<AudiusTrack[]>('/tracks/trending?limit=30'),
+    ])
+    const playlists = playlistResult.map((playlist) => this.toPlaylist(playlist))
+    const trendingTracks = tracksResult.map((track) => this.toTrack(track)).filter(Boolean) as Track[]
+    return [{
+      id: 'audius-trending-tracks',
+      name: 'Audius 热门单曲',
+      description: '来自 Audius 的公开音乐。仅在线播放。',
+      coverUrl: trendingTracks[0]?.coverUrl,
+      tracks: trendingTracks,
+    }, ...playlists]
+  }
+
+  async getLyrics() {
+    return []
+  }
+
+  private async request<T>(path: string): Promise<T> {
+    const response = await fetch(`${API_URL}${path}`)
+    if (!response.ok) throw new Error(`Audius 请求失败（${response.status}）`)
+    const body = await response.json() as ApiResponse<T>
+    return body.data
+  }
+
+  private toPlaylist(playlist: AudiusPlaylist): Playlist {
+    return {
+      id: playlist.id,
+      name: playlist.playlist_name,
+      description: playlist.description ?? '来自 Audius 的公开音乐。仅在线播放。',
+      coverUrl: playlist.artwork?.['480x480'] ?? playlist.artwork?.['1000x1000'],
+      tracks: (playlist.tracks ?? []).map((track) => this.toTrack(track)).filter(Boolean) as Track[],
+    }
+  }
+
+  private toTrack(track: AudiusTrack): Track | null {
+    if (!track.is_streamable || !track.stream?.url) return null
+    return {
+      id: track.id,
+      title: track.title,
+      artist: track.user?.name ?? 'Audius 创作者',
+      duration: track.duration ?? 0,
+      coverUrl: track.artwork?.['480x480'] ?? track.artwork?.['1000x1000'],
+      streamUrl: track.stream.url,
+      lyrics: [],
+      allowOfflineDownload: false,
+    }
+  }
+}

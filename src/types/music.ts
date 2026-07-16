@@ -14,6 +14,7 @@ export type Track = {
   coverUrl?: string
   streamUrl: string
   lyrics: LyricLine[]
+  allowOfflineDownload?: boolean
 }
 
 export type Playlist = {
@@ -39,5 +40,11 @@ export type SubsonicSession = {
   password: string
 }
 
-export type MusicSession = JellyfinSession | SubsonicSession
+export type AudiusSession = {
+  provider: 'audius'
+  serverUrl: 'https://api.audius.co'
+  username: 'Audius'
+}
+
+export type MusicSession = JellyfinSession | SubsonicSession | AudiusSession
 export type MusicProviderType = MusicSession['provider']

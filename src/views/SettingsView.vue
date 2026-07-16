@@ -17,7 +17,7 @@ function disconnect() {
   <section class="page settings-page">
     <button class="back-button" @click="router.back()">← 返回</button>
     <p class="eyebrow">设置</p><h1>你的播放器</h1>
-    <div class="settings-card"><small>{{ auth.session?.provider === 'subsonic' ? 'NAVIDROME / OPENSUBSONIC' : 'JELLYFIN' }} 服务器</small><strong>{{ auth.session?.serverUrl || '尚未连接' }}</strong><span>{{ auth.session?.username || '离线内容仅限此前已下载的歌曲' }}</span></div>
+    <div class="settings-card"><small>{{ auth.session?.provider === 'audius' ? 'AUDIUS 公共音乐' : auth.session?.provider === 'subsonic' ? 'NAVIDROME / OPENSUBSONIC' : 'JELLYFIN' }} {{ auth.session?.provider === 'audius' ? '' : '服务器' }}</small><strong>{{ auth.session?.provider === 'audius' ? '公开音乐目录' : auth.session?.serverUrl || '尚未连接' }}</strong><span>{{ auth.session?.provider === 'audius' ? '无需账号，仅支持在线播放。' : auth.session?.username || '离线内容仅限此前已下载的歌曲' }}</span></div>
     <button class="settings-card settings-button-card" @click="router.push('/downloads')"><small>离线缓存</small><strong>管理已下载内容</strong><span>查看歌曲下载、存储占用并清除缓存。</span></button>
     <button v-if="app.canInstall" class="settings-card settings-button-card" @click="app.install()"><small>PWA 应用</small><strong>安装 LM Music</strong><span>添加到设备主屏幕或桌面，以独立应用形式打开。</span></button>
     <p v-if="app.serviceWorkerError" class="form-error">{{ app.serviceWorkerError }}</p>

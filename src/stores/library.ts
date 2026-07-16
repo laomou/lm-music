@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { JellyfinClient } from '@/services/jellyfin/client'
 import { NavidromeClient } from '@/services/navidrome/client'
+import { AudiusClient } from '@/services/audius/client'
 import { getLibrary, getDownloadedTracks, saveLibrary, serverCacheId } from '@/services/offline-storage'
 import type { Playlist } from '@/types/music'
 import { useAuthStore } from './auth'
@@ -37,7 +38,9 @@ export const useLibraryStore = defineStore('library', {
         }
         const playlists = auth.session.provider === 'jellyfin'
           ? await new JellyfinClient(auth.session).getPlaylists()
-          : await new NavidromeClient(auth.session).getPlaylists()
+          : auth.session.provider === 'subsonic'
+            ? await new NavidromeClient(auth.session).getPlaylists()
+            : await new AudiusClient().getPlaylists()
         this.playlists = playlists
         this.source = 'network'
         await saveLibrary(cacheId, playlists)
@@ -55,7 +58,9 @@ export const useLibraryStore = defineStore('library', {
       if (track && !track.lyrics.length) {
         track.lyrics = auth.session.provider === 'jellyfin'
           ? await new JellyfinClient(auth.session).getLyrics(trackId)
-          : await new NavidromeClient(auth.session).getLyrics(trackId)
+          : auth.session.provider === 'subsonic'
+            ? await new NavidromeClient(auth.session).getLyrics(trackId)
+            : []
         await saveLibrary(serverCacheId(auth.session.serverUrl, auth.session.provider === 'jellyfin' ? auth.session.userId : auth.session.username, auth.session.provider), this.playlists)
       }
     },

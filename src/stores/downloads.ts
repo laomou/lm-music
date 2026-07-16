@@ -51,6 +51,10 @@ export const useDownloadsStore = defineStore('downloads', {
       }
     },
     async downloadSingle(track: Track, playlistId?: string) {
+      if (track.allowOfflineDownload === false) {
+        this.error = 'Audius 公共音乐在 LM Music 中仅支持在线播放，不能离线下载。'
+        return
+      }
       if (this.isDownloaded(track.id)) return
       const task: DownloadTask = { id: `track:${track.id}`, label: track.title, completed: 0, total: 1, status: 'downloading' }
       this.tasks = [...this.tasks.filter((item) => item.id !== task.id), task]
@@ -74,6 +78,10 @@ export const useDownloadsStore = defineStore('downloads', {
       }
     },
     async downloadPlaylist(playlist: Playlist) {
+      if (playlist.tracks.some((track) => track.allowOfflineDownload === false)) {
+        this.error = 'Audius 公共音乐在 LM Music 中仅支持在线播放，不能离线下载。'
+        return
+      }
       const task: DownloadTask = { id: `playlist:${playlist.id}`, label: playlist.name, completed: 0, total: playlist.tracks.length, status: 'downloading' }
       this.tasks = [...this.tasks.filter((item) => item.id !== task.id), task]
       const controller = new AbortController()
