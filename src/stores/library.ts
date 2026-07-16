@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia'
-import { JellyfinClient } from '@/services/jellyfin/client'
-import { NavidromeClient } from '@/services/navidrome/client'
-import { AudiusClient } from '@/services/audius/client'
-import { getLibrary, getDownloadedTracks, saveLibrary, serverCacheId } from '@/services/offline-storage'
+import { getLibrary, getDownloadedTracks, saveLibrary } from '@/services/offline-storage'
+import { getProviderForSession, sessionCacheId } from '@/services/providers'
 import type { Playlist } from '@/types/music'
 import { useAuthStore } from './auth'
 
@@ -16,7 +14,7 @@ export const useLibraryStore = defineStore('library', {
       this.loading = true
       this.error = ''
       const auth = useAuthStore()
-      const cacheId = serverCacheId(auth.session?.serverUrl, auth.session?.provider === 'jellyfin' ? auth.session.userId : auth.session?.username, auth.session?.provider)
+      const cacheId = sessionCacheId(auth.session)
       try {
         const cached = await getLibrary(cacheId)
         if (cached?.playlists.length) {
@@ -24,11 +22,11 @@ export const useLibraryStore = defineStore('library', {
           this.source = 'cache'
         }
         if (!auth.session) {
-          if (!this.playlists.length) throw new Error('请先连接 Jellyfin 服务器。')
+          if (!this.playlists.length) throw new Error('请先连接音乐服务器或 Audius。')
           return
         }
         if (!navigator.onLine) {
-          if (!this.playlists.length) throw new Error('当前离线，且没有已缓存的 Jellyfin 歌单。')
+          if (!this.playlists.length) throw new Error('当前离线，且没有已缓存的歌单。')
           const downloaded = await getDownloadedTracks(cacheId)
           const trackIds = new Set(downloaded.tracks.map((track) => track.trackId))
           this.playlists = this.playlists
@@ -36,11 +34,7 @@ export const useLibraryStore = defineStore('library', {
             .filter((playlist) => playlist.tracks.length > 0)
           return
         }
-        const playlists = auth.session.provider === 'jellyfin'
-          ? await new JellyfinClient(auth.session).getPlaylists()
-          : auth.session.provider === 'subsonic'
-            ? await new NavidromeClient(auth.session).getPlaylists()
-            : await new AudiusClient().getPlaylists()
+        const playlists = await getProviderForSession(auth.session).createClient(auth.session).getPlaylists()
         this.playlists = playlists
         this.source = 'network'
         await saveLibrary(cacheId, playlists)
@@ -56,12 +50,8 @@ export const useLibraryStore = defineStore('library', {
       if (!auth.session || !navigator.onLine) return
       const track = this.playlists.flatMap((playlist) => playlist.tracks).find((item) => item.id === trackId)
       if (track && !track.lyrics.length) {
-        track.lyrics = auth.session.provider === 'jellyfin'
-          ? await new JellyfinClient(auth.session).getLyrics(trackId)
-          : auth.session.provider === 'subsonic'
-            ? await new NavidromeClient(auth.session).getLyrics(trackId)
-            : []
-        await saveLibrary(serverCacheId(auth.session.serverUrl, auth.session.provider === 'jellyfin' ? auth.session.userId : auth.session.username, auth.session.provider), this.playlists)
+        track.lyrics = await getProviderForSession(auth.session).createClient(auth.session).getLyrics(trackId)
+        await saveLibrary(sessionCacheId(auth.session), this.playlists)
       }
     },
   },

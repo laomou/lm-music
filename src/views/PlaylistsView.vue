@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useLibraryStore } from '@/stores/library'
 import { usePlayerStore } from '@/stores/player'
+import { getProviderForSession } from '@/services/providers'
 
 const router = useRouter()
 const auth = useAuthStore()
 const library = useLibraryStore()
 const player = usePlayerStore()
+const providerLabel = computed(() => auth.session ? getProviderForSession(auth.session).label : '')
 
 function openDownloads() { router.push('/downloads') }
 
@@ -28,7 +30,7 @@ function resume() {
       <span><small>继续收听</small><strong>{{ player.currentTrack.title }}</strong><em>{{ player.currentTrack.artist }}</em></span><b>▶</b>
     </button>
 
-    <div class="section-heading"><h2>{{ auth.isConnected ? `${auth.session?.provider === 'jellyfin' ? 'Jellyfin' : auth.session?.provider === 'subsonic' ? 'Navidrome' : 'Audius 热门'} 歌单` : '已下载歌单' }}</h2><span v-if="library.loading">同步中…</span></div>
+    <div class="section-heading"><h2>{{ auth.isConnected ? `${providerLabel}${auth.session?.provider === 'audius' ? ' 热门' : ''}歌单` : '已下载歌单' }}</h2><span v-if="library.loading">同步中…</span></div>
     <p v-if="library.error" class="form-error">{{ library.error }}</p>
     <div v-if="library.playlists.length" class="playlist-grid">
       <button v-for="playlist in library.playlists" :key="playlist.id" class="playlist-card" @click="router.push(`/playlist/${playlist.id}`)">
