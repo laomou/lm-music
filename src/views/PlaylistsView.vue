@@ -51,7 +51,7 @@ function playRecent(trackId: string) {
     <div class="section-heading"><h2>{{ auth.isConnected ? t('library.playlists', { provider: providerLabel }) : t('library.offlinePlaylists') }}</h2><span v-if="library.loading">{{ t('common.loading') }}</span></div>
     <p v-if="library.error" class="form-error">{{ library.error }}</p>
     <div v-if="library.playlists.length" class="playlist-grid">
-      <button type="button" v-for="playlist in library.playlists" :key="playlist.id" class="playlist-card" @click="router.push(`/playlist/${playlist.id}`)">
+      <button type="button" v-for="playlist in library.playlists" :key="playlist.id" class="playlist-card" :aria-label="t('library.openPlaylist', { name: playlist.name })" @click="router.push(`/playlist/${playlist.id}`)">
         <CoverImage :src="playlist.coverUrl" alt="" />
         <span><strong>{{ playlist.name }}</strong><small>{{ t('library.trackCount', { count: playlist.tracks.length }) }}</small></span>
       </button>
