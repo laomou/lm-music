@@ -7,6 +7,7 @@ import { usePlayerStore } from '@/stores/player'
 import { getProviderForSession } from '@/services/providers'
 import { Download, Play, Settings } from '@lucide/vue'
 import { t } from '@/i18n'
+import CoverImage from '@/components/CoverImage.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -36,14 +37,14 @@ function playRecent(trackId: string) {
     <header class="topbar"><div><p class="eyebrow">LM MUSIC</p><h1>{{ t('library.title') }}</h1></div><div class="header-actions"><button class="settings-button" :aria-label="t('common.downloads')" @click="openDownloads"><Download /></button><button class="settings-button" :aria-label="t('common.settings')" @click="router.push('/settings')"><Settings /></button></div></header>
 
     <button v-if="player.currentTrack" class="resume-card" @click="resume">
-      <img :src="player.currentTrack.coverUrl" alt="" />
+      <CoverImage :src="player.currentTrack.coverUrl" alt="" />
       <span><small>{{ t('library.continue') }}</small><strong>{{ player.currentTrack.title }}</strong><em>{{ player.currentTrack.artist }}</em></span><b><Play :size="15" fill="currentColor" /></b>
     </button>
 
     <div v-if="player.recentTracks.length" class="section-heading"><h2>{{ t('library.recent') }}</h2></div>
     <div v-if="player.recentTracks.length" class="recent-tracks">
       <button v-for="track in player.recentTracks.slice(0, 6)" :key="track.id" class="recent-track" @click="playRecent(track.id)">
-        <img :src="track.coverUrl" alt="" /><span><strong>{{ track.title }}</strong><small>{{ track.artist }}</small></span><Play :size="16" fill="currentColor" />
+        <CoverImage :src="track.coverUrl" alt="" /><span><strong>{{ track.title }}</strong><small>{{ track.artist }}</small></span><Play :size="16" fill="currentColor" />
       </button>
     </div>
 
@@ -51,7 +52,7 @@ function playRecent(trackId: string) {
     <p v-if="library.error" class="form-error">{{ library.error }}</p>
     <div v-if="library.playlists.length" class="playlist-grid">
       <button v-for="playlist in library.playlists" :key="playlist.id" class="playlist-card" @click="router.push(`/playlist/${playlist.id}`)">
-        <img :src="playlist.coverUrl" alt="" />
+        <CoverImage :src="playlist.coverUrl" alt="" />
         <span><strong>{{ playlist.name }}</strong><small>{{ t('library.trackCount', { count: playlist.tracks.length }) }}</small></span>
       </button>
     </div>

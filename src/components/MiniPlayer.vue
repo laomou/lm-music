@@ -4,6 +4,7 @@ import { Pause, Play } from '@lucide/vue'
 import { useRouter } from 'vue-router'
 import { usePlayerStore } from '@/stores/player'
 import { t } from '@/i18n'
+import CoverImage from '@/components/CoverImage.vue'
 
 const player = usePlayerStore()
 const router = useRouter()
@@ -18,7 +19,7 @@ const progressOffset = computed(() => circumference * (1 - progress.value))
 
 <template>
   <button v-if="player.currentTrack" class="mini-player" @click="router.push('/now-playing')">
-    <img :src="player.currentTrack.coverUrl" alt="" />
+    <CoverImage :src="player.currentTrack.coverUrl" alt="" />
     <span class="mini-meta"><strong :title="player.currentTrack.title">{{ player.currentTrack.title }}</strong><small :title="player.currentTrack.artist">{{ player.currentTrack.artist }}</small></span>
     <span class="mini-toggle-wrap">
       <svg class="mini-progress" viewBox="0 0 40 40" aria-hidden="true">
