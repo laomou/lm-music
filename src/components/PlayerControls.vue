@@ -7,12 +7,13 @@ import { t } from '@/i18n'
 const player = usePlayerStore()
 const canGoPrevious = computed(() => player.currentTime > 3 || player.hasPrevious)
 const canGoNext = computed(() => player.queue.length > 1 && (player.shuffle || player.hasNext || player.repeatMode === 'all'))
+const shuffleLabel = computed(() => player.shuffle ? t('player.shuffleOn') : t('player.shuffleOff'))
 const repeatLabel = computed(() => player.repeatMode === 'one' ? t('player.repeatOne') : player.repeatMode === 'all' ? t('player.repeatAll') : t('player.repeatOff'))
 </script>
 
 <template>
   <div class="player-controls" role="toolbar" :aria-label="t('player.nowPlaying')">
-    <button type="button" class="icon-button secondary" :class="{ active: player.shuffle }" :aria-label="t('player.shuffle')" :aria-pressed="player.shuffle" :disabled="player.queue.length < 2" @click="player.toggleShuffle()"><Shuffle /></button>
+    <button type="button" class="icon-button secondary" :class="{ active: player.shuffle }" :aria-label="shuffleLabel" :aria-pressed="player.shuffle" :disabled="player.queue.length < 2" @click="player.toggleShuffle()"><Shuffle /></button>
     <button type="button" class="icon-button" :aria-label="t('player.previous')" :disabled="!canGoPrevious" @click="player.previous()"><SkipBack /></button>
     <button type="button" class="play-button" :aria-label="player.isPlaying ? t('player.pause') : t('player.play')" :aria-pressed="player.isPlaying" @click="player.togglePlayback()">
       <Pause v-if="player.isPlaying" :size="28" fill="currentColor" />
