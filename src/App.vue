@@ -8,15 +8,22 @@ import MiniPlayer from '@/components/MiniPlayer.vue'
 import { usePlayerShortcuts } from '@/composables/usePlayerShortcuts'
 import { locale, t } from '@/i18n'
 import { usePlayerStore } from '@/stores/player'
+import { useLibraryStore } from '@/stores/library'
 
 const route = useRoute()
 const player = usePlayerStore()
+const library = useLibraryStore()
 const isConnect = computed(() => route.path === '/connect')
 usePlayerShortcuts()
 
-watch([() => route.fullPath, () => player.currentTrack, locale], () => {
+watch([() => route.fullPath, () => player.currentTrack, () => library.playlists, locale], () => {
   if (player.currentTrack) {
     document.title = `${player.currentTrack.title} · ${player.currentTrack.artist} — LM Music`
+    return
+  }
+  if (route.path.startsWith('/playlist/')) {
+    const playlist = library.playlists.find((item) => item.id === route.params.id)
+    document.title = `${playlist?.name || t('playlist.label')} — LM Music`
     return
   }
   const titleKey = typeof route.meta.titleKey === 'string' ? route.meta.titleKey : ''
