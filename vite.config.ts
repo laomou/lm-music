@@ -19,6 +19,7 @@ export default defineConfig({
         theme_color: '#0b0c12',
         background_color: '#0b0c12',
         display: 'standalone',
+        categories: ['music', 'entertainment'],
         start_url: base,
         scope: base,
         icons: [
@@ -27,9 +28,9 @@ export default defineConfig({
           { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
         shortcuts: [
-          { name: 'Playlists', short_name: 'Playlists', url: `${base}#/playlists`, icons: [{ src: 'icon-192.png', sizes: '192x192' }] },
-          { name: 'Downloads', short_name: 'Downloads', url: `${base}#/downloads`, icons: [{ src: 'icon-192.png', sizes: '192x192' }] },
-          { name: 'Settings', short_name: 'Settings', url: `${base}#/settings`, icons: [{ src: 'icon-192.png', sizes: '192x192' }] },
+          { name: 'Playlists', short_name: 'Playlists', url: `${base}#/playlists`, icons: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }] },
+          { name: 'Downloads', short_name: 'Downloads', url: `${base}#/downloads`, icons: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }] },
+          { name: 'Settings', short_name: 'Settings', url: `${base}#/settings`, icons: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }] },
         ],
       },
       workbox: {
