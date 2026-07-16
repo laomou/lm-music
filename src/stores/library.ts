@@ -61,10 +61,18 @@ export const useLibraryStore = defineStore('library', {
     async loadLyrics(trackId: string) {
       const auth = useAuthStore()
       if (!auth.session || !navigator.onLine) return
+      const session = auth.session
+      const cacheId = sessionCacheId(session)
       const track = this.playlists.flatMap((playlist) => playlist.tracks).find((item) => item.id === trackId)
       if (track && !track.lyrics.length) {
-        track.lyrics = await getProviderForSession(auth.session).createClient(auth.session).getLyrics(trackId)
-        await saveLibrary(sessionCacheId(auth.session), this.playlists)
+        try {
+          const lyrics = await getProviderForSession(session).createClient(session).getLyrics(trackId)
+          if (cacheId !== sessionCacheId(useAuthStore().session)) return
+          track.lyrics = lyrics
+          await saveLibrary(cacheId, this.playlists)
+        } catch {
+          // Lyrics are optional. Keep playback and the rest of the library usable.
+        }
       }
     },
   },
