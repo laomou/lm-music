@@ -20,7 +20,10 @@ export function useMediaSession() {
       navigator.mediaSession.metadata = null
       return
     }
-    navigator.mediaSession.metadata = new MediaMetadata({ title: track.title, artist: track.artist, album: track.album, artwork: [{ src: track.coverUrl || fallbackArtwork, sizes: '512x512', type: 'image/png' }] })
+    const artwork = track.coverUrl
+      ? [{ src: track.coverUrl, sizes: '512x512' }]
+      : [{ src: fallbackArtwork, sizes: '512x512', type: 'image/png' }]
+    navigator.mediaSession.metadata = new MediaMetadata({ title: track.title, artist: track.artist, album: track.album, artwork })
   }, { immediate: true })
   watch(() => player.isPlaying, (isPlaying) => { navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused' })
   watch(
