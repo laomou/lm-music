@@ -90,12 +90,40 @@ export async function getLibrary(serverId: string) {
   return getRecord<StoredLibrary>(LIBRARY_STORE, serverId)
 }
 
-export async function downloadTrack(serverId: string, track: Track, playlistId?: string, signal?: AbortSignal): Promise<DownloadedTrack> {
+type DownloadProgress = (receivedBytes: number, totalBytes: number) => void
+
+async function readResponseWithProgress(response: Response, onProgress?: DownloadProgress) {
+  const totalBytes = Number(response.headers.get('content-length')) || 0
+  if (!response.body || !onProgress) {
+    const blob = await response.blob()
+    onProgress?.(blob.size, totalBytes || blob.size)
+    return { response: new Response(blob, { status: response.status, statusText: response.statusText, headers: response.headers }), bytes: blob.size }
+  }
+
+  const reader = response.body.getReader()
+  const chunks: ArrayBuffer[] = []
+  let receivedBytes = 0
+  onProgress(0, totalBytes)
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    if (!value) continue
+    chunks.push(value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength) as ArrayBuffer)
+    receivedBytes += value.byteLength
+    onProgress(receivedBytes, totalBytes)
+  }
+
+  const blob = new Blob(chunks, { type: response.headers.get('content-type') || 'audio/*' })
+  onProgress(receivedBytes, totalBytes || receivedBytes)
+  return { response: new Response(blob, { status: response.status, statusText: response.statusText, headers: response.headers }), bytes: receivedBytes }
+}
+
+export async function downloadTrack(serverId: string, track: Track, playlistId?: string, signal?: AbortSignal, onProgress?: DownloadProgress): Promise<DownloadedTrack> {
   const cache = await caches.open(CACHE_NAME)
   const audioResponse = await fetch(track.streamUrl, { signal })
   if (!audioResponse.ok) throw new Error(`无法下载「${track.title}」（${audioResponse.status}）`)
-  const audioBytes = Number(audioResponse.headers.get('content-length')) || (await audioResponse.clone().blob()).size
-  await cache.put(track.streamUrl, audioResponse.clone())
+  const { response: cachedAudioResponse, bytes: audioBytes } = await readResponseWithProgress(audioResponse, onProgress)
+  await cache.put(track.streamUrl, cachedAudioResponse)
 
   let coverCacheKey: string | undefined
   if (track.coverUrl) {

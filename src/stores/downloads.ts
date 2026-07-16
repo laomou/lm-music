@@ -13,7 +13,16 @@ import {
 import { getProviderForSession, sessionCacheId } from '@/services/providers'
 import { useAuthStore } from './auth'
 
-export type DownloadTask = { id: string; label: string; completed: number; total: number; status: 'downloading' | 'completed' | 'failed' | 'cancelled'; error?: string }
+export type DownloadTask = {
+  id: string
+  label: string
+  completed: number
+  total: number
+  receivedBytes: number
+  totalBytes: number
+  status: 'downloading' | 'completed' | 'failed' | 'cancelled'
+  error?: string
+}
 
 export const useDownloadsStore = defineStore('downloads', {
   state: () => ({
@@ -57,13 +66,16 @@ export const useDownloadsStore = defineStore('downloads', {
         return
       }
       if (this.isDownloaded(track.id)) return
-      const task: DownloadTask = { id: `track:${track.id}`, label: track.title, completed: 0, total: 1, status: 'downloading' }
+      const task: DownloadTask = { id: `track:${track.id}`, label: track.title, completed: 0, total: 1, receivedBytes: 0, totalBytes: 0, status: 'downloading' }
       this.tasks = [...this.tasks.filter((item) => item.id !== task.id), task]
       const controller = new AbortController()
       this.controllers.set(task.id, controller)
       try {
         await requestPersistentStorage()
-        await downloadTrack(this.serverId, track, playlistId, controller.signal)
+        await downloadTrack(this.serverId, track, playlistId, controller.signal, (receivedBytes, totalBytes) => {
+          task.receivedBytes = receivedBytes
+          task.totalBytes = totalBytes
+        })
         task.completed = 1
         task.status = 'completed'
         await this.refresh()
@@ -84,7 +96,7 @@ export const useDownloadsStore = defineStore('downloads', {
         this.error = '当前音乐来源仅支持在线播放，不能离线下载。'
         return
       }
-      const task: DownloadTask = { id: `playlist:${playlist.id}`, label: playlist.name, completed: 0, total: playlist.tracks.length, status: 'downloading' }
+      const task: DownloadTask = { id: `playlist:${playlist.id}`, label: playlist.name, completed: 0, total: playlist.tracks.length, receivedBytes: 0, totalBytes: 0, status: 'downloading' }
       this.tasks = [...this.tasks.filter((item) => item.id !== task.id), task]
       const controller = new AbortController()
       this.controllers.set(task.id, controller)
@@ -92,7 +104,14 @@ export const useDownloadsStore = defineStore('downloads', {
         await requestPersistentStorage()
         for (const track of playlist.tracks) {
           if (controller.signal.aborted) throw new DOMException('下载已取消', 'AbortError')
-          if (!this.isDownloaded(track.id)) await downloadTrack(this.serverId, track, playlist.id, controller.signal)
+          task.receivedBytes = 0
+          task.totalBytes = 0
+          if (!this.isDownloaded(track.id)) {
+            await downloadTrack(this.serverId, track, playlist.id, controller.signal, (receivedBytes, totalBytes) => {
+              task.receivedBytes = receivedBytes
+              task.totalBytes = totalBytes
+            })
+          }
           task.completed += 1
           await this.refresh()
         }

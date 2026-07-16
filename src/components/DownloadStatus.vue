@@ -12,7 +12,9 @@ const activeTask = computed(() => downloads.tasks.find((task) => task.status ===
 const latestTask = computed(() => activeTask.value ?? downloads.tasks.at(-1))
 const progress = computed(() => {
   const task = latestTask.value
-  return task && task.total > 0 ? Math.round(task.completed / task.total * 100) : 0
+  if (!task || task.total <= 0) return 0
+  const fileProgress = task.totalBytes > 0 ? Math.min(task.receivedBytes / task.totalBytes, 1) : 0
+  return Math.round(Math.min((task.completed + fileProgress) / task.total, 1) * 100)
 })
 const isComplete = computed(() => latestTask.value?.status === 'completed')
 </script>
