@@ -100,7 +100,7 @@ function clearRecent() {
 
 <template>
   <section class="page playlists-page" :aria-busy="library.loading">
-    <header class="topbar"><div><p class="eyebrow">LM MUSIC</p><h1>{{ t('library.title') }}</h1></div><div class="header-actions"><button type="button" class="settings-button" :aria-label="t('library.refresh')" :disabled="library.loading" @click="library.fetchPlaylists()"><RefreshCw /></button><button type="button" class="settings-button" :aria-label="t('common.downloads')" @click="openDownloads"><Download /></button><button type="button" class="settings-button" :aria-label="t('common.settings')" @click="router.push('/settings')"><Settings /></button></div></header>
+    <header class="topbar"><div><p class="eyebrow">LM MUSIC</p><h1>{{ t('library.title') }}</h1></div><div class="header-actions"><button type="button" v-if="auth.isConnected" class="settings-button" :aria-label="t('library.refresh')" :disabled="library.loading" @click="library.fetchPlaylists()"><RefreshCw /></button><button type="button" class="settings-button" :aria-label="t('common.downloads')" @click="openDownloads"><Download /></button><button type="button" class="settings-button" :aria-label="t('common.settings')" @click="router.push('/settings')"><Settings /></button></div></header>
 
     <button type="button" v-if="player.currentTrack" class="resume-card" :aria-label="t('library.resumeTrack', { title: player.currentTrack.title })" @click="resume">
       <CoverImage :src="player.currentTrack.coverUrl" alt="" />
