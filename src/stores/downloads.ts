@@ -13,7 +13,7 @@ import { getProviderForSession, sessionCacheId } from '@/services/providers'
 import { useAuthStore } from './auth'
 import { t } from '@/i18n'
 
-export type DownloadTask = {
+type DownloadTask = {
   id: string
   label: string
   completed: number

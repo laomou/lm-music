@@ -1,5 +1,6 @@
 import { t } from '@/i18n'
 import type { LocalFolderSession, LyricLine, Playlist, Track } from '@/types/music'
+import { parseLrc } from '@/utils/parseLrc'
 
 const DB_NAME = 'lm-music-local-folder'
 const DB_VERSION = 1
@@ -51,17 +52,6 @@ function isAudioFile(name: string) {
 
 function cleanTitle(name: string) {
   return name.replace(/\.[^.]+$/, '')
-}
-
-function parseLrc(value: string): LyricLine[] {
-  const lines = value.split(/\r?\n/)
-  const parsed: LyricLine[] = []
-  for (const line of lines) {
-    const matches = [...line.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)]
-    const text = line.replace(/\[\d+:\d+(?:\.\d+)?\]/g, '').trim()
-    for (const match of matches) parsed.push({ time: Number(match[1]) * 60 + Number(match[2]), text })
-  }
-  return parsed.sort((left, right) => left.time - right.time)
 }
 
 async function readLyrics(handle?: FileSystemFileHandle) {

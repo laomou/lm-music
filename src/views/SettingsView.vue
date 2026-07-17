@@ -5,7 +5,8 @@ import { useAppStore } from '@/stores/app'
 import { getProviderForSession, getProviderSubtitle } from '@/services/providers'
 import { computed } from 'vue'
 import { ArrowLeft } from '@lucide/vue'
-import { locale, setLocale, t, type Locale } from '@/i18n'
+import { t } from '@/i18n'
+import { useLocale } from '@/composables/useLocale'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -18,10 +19,7 @@ const sourceLabel = computed(() => {
     ? provider.value.label.toUpperCase()
     : `${provider.value.label.toUpperCase()} ${t('settings.server').toUpperCase()}`
 })
-const language = computed({
-  get: () => locale.value,
-  set: (value: Locale) => setLocale(value),
-})
+const language = useLocale()
 
 function disconnect() {
   if (!window.confirm(t('settings.confirmDisconnect'))) return

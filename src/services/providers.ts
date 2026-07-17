@@ -5,13 +5,13 @@ import { NavidromeClient } from '@/services/navidrome/client'
 import type { LyricLine, MusicProviderType, MusicSession, Playlist } from '@/types/music'
 import { t } from '@/i18n'
 
-export type ProviderCredentials = {
+type ProviderCredentials = {
   serverUrl?: string
   username?: string
   password?: string
 }
 
-export type MusicProviderClient = {
+type MusicProviderClient = {
   getPlaylists(): Promise<Playlist[]>
   getLyrics(trackId: string): Promise<LyricLine[]>
 }

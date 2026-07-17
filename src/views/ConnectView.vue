@@ -5,7 +5,8 @@ import { getMusicProvider, getProviderSubtitle, musicProviders } from '@/service
 import { useAuthStore } from '@/stores/auth'
 import type { MusicProviderType } from '@/types/music'
 import { ArrowLeft } from '@lucide/vue'
-import { locale, setLocale, t, type Locale } from '@/i18n'
+import { t } from '@/i18n'
+import { useLocale } from '@/composables/useLocale'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -16,10 +17,7 @@ const loading = ref(false)
 const error = ref('')
 const provider = ref<MusicProviderType>('jellyfin')
 const appIconSrc = `${import.meta.env.BASE_URL}icon-192.png`
-const language = computed({
-  get: () => locale.value,
-  set: (value: Locale) => setLocale(value),
-})
+const language = useLocale()
 const insecureServerUrl = computed(() => {
   const source = getMusicProvider(provider.value)
   return source.requiresCredentials && location.protocol === 'https:' && serverUrl.value.trim().toLowerCase().startsWith('http://')

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Check, Download, ListPlus, Play, Radio } from '@lucide/vue'
 import CoverImage from '@/components/CoverImage.vue'
@@ -17,6 +17,7 @@ const player = usePlayerStore()
 const downloads = useDownloadsStore()
 const collection = computed(() => library.collectionById(String(route.params.id)))
 const canDownload = computed(() => !collection.value?.tracks.some((track) => track.allowOfflineDownload === false))
+const queuedTrackId = ref('')
 
 function play(index: number) {
   const current = collection.value
@@ -27,6 +28,8 @@ function play(index: number) {
 
 function addToQueue(track: Track) {
   player.addToQueue(track)
+  queuedTrackId.value = track.id
+  window.setTimeout(() => { if (queuedTrackId.value === track.id) queuedTrackId.value = '' }, 1600)
 }
 
 async function download() {
@@ -48,7 +51,7 @@ async function download() {
           <span class="track-number"><Radio v-if="player.currentTrack?.id === track.id && player.isPlaying" :size="15" />{{ player.currentTrack?.id === track.id && player.isPlaying ? '' : String(index + 1).padStart(2, '0') }}</span>
           <CoverImage :src="track.coverUrl" alt="" /><span class="track-copy"><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span>
         </button>
-        <span class="track-actions"><button type="button" class="download-icon" :aria-label="t('player.addToQueue', { title: track.title })" @click="addToQueue(track)"><ListPlus :size="16" /></button><button type="button" v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="downloads.isDownloaded(track.id) ? t('playlist.downloadedTrack', { title: track.title }) : t('playlist.downloadTrack', { title: track.title })" :disabled="downloads.isDownloaded(track.id)" @click="downloads.downloadSingle(track, collection.id)"><Check v-if="downloads.isDownloaded(track.id)" :size="16" /><Download v-else :size="16" /></button><time>{{ formatDuration(track.duration) }}</time></span>
+        <span class="track-actions"><button type="button" class="download-icon" :aria-label="queuedTrackId === track.id ? t('player.addedToQueue', { title: track.title }) : t('player.addToQueue', { title: track.title })" @click="addToQueue(track)"><Check v-if="queuedTrackId === track.id" :size="16" /><ListPlus v-else :size="16" /></button><button type="button" v-if="track.allowOfflineDownload !== false" class="download-icon" :aria-label="downloads.isDownloaded(track.id) ? t('playlist.downloadedTrack', { title: track.title }) : t('playlist.downloadTrack', { title: track.title })" :disabled="downloads.isDownloaded(track.id)" @click="downloads.downloadSingle(track, collection.id)"><Check v-if="downloads.isDownloaded(track.id)" :size="16" /><Download v-else :size="16" /></button><time>{{ formatDuration(track.duration) }}</time></span>
       </div>
     </div>
   </section>

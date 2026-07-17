@@ -79,10 +79,6 @@ async function allRecords<T>(storeName: string): Promise<T[]> {
   })
 }
 
-export function serverCacheId(serverUrl?: string, userId?: string, provider?: string) {
-  return serverUrl && userId ? `${provider ?? 'jellyfin'}::${serverUrl.replace(/\/$/, '')}::${userId}` : 'offline'
-}
-
 export async function saveLibrary(serverId: string, playlists: Playlist[]) {
   await putRecord(LIBRARY_STORE, { id: serverId, playlists, updatedAt: Date.now() } satisfies StoredLibrary)
 }

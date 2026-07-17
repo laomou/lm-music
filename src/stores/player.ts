@@ -18,7 +18,7 @@ type PersistedPlayer = {
 }
 
 export type RecentTrack = Track & { playedAt: number }
-export type FavoriteTrack = Track & { favoritedAt: number }
+type FavoriteTrack = Track & { favoritedAt: number }
 
 const restore = (): PersistedPlayer => {
   try {

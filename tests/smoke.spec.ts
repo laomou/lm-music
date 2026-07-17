@@ -40,7 +40,7 @@ test('Audius source can enter the library and navigate core pages', async ({ pag
   await mockAudius(page)
   await page.goto('/#/connect')
 
-  await page.locator('input[value="audius"]').check({ force: true })
+  await page.getByText('Audius', { exact: true }).click()
   await page.getByRole('button', { name: /Browse Audius/i }).click()
 
   await expect(page).toHaveURL(/#\/playlists/)

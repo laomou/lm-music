@@ -1,5 +1,6 @@
 import type { LyricLine, Playlist, SubsonicSession, Track } from '@/types/music'
 import { t } from '@/i18n'
+import { parseLrc } from '@/utils/parseLrc'
 
 type SubsonicResponse<T> = {
   'subsonic-response': T & { status: 'ok' | 'failed'; error?: { message?: string } }
@@ -27,17 +28,6 @@ type SubsonicLyrics = {
 
 function encodePassword(password: string) {
   return `enc:${Array.from(new TextEncoder().encode(password)).map((byte) => byte.toString(16).padStart(2, '0')).join('')}`
-}
-
-function parseLrc(value: string): LyricLine[] {
-  const lines = value.split(/\r?\n/)
-  const parsed: LyricLine[] = []
-  for (const line of lines) {
-    const matches = [...line.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)]
-    const text = line.replace(/\[\d+:\d+(?:\.\d+)?\]/g, '').trim()
-    for (const match of matches) parsed.push({ time: Number(match[1]) * 60 + Number(match[2]), text })
-  }
-  return parsed.sort((left, right) => left.time - right.time)
 }
 
 export class NavidromeClient {
