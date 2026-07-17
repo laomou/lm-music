@@ -17,7 +17,7 @@ export default defineConfig({
       manifest: {
         name: 'LM Music',
         short_name: 'LM Music',
-        description: '支持 Jellyfin、Navidrome 与 Audius 的 PWA 音乐播放器',
+        description: '支持 Jellyfin、Navidrome、Audius 与本地音乐文件夹的音乐播放器',
         theme_color: '#0b0c12',
         background_color: '#0b0c12',
         display: 'standalone',

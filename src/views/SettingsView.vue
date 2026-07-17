@@ -38,7 +38,7 @@ function disconnect() {
     <label class="settings-card locale-settings"><small>{{ t('common.language') }}</small><select v-model="language"><option value="zh-CN">{{ t('common.chinese') }}</option><option value="en">{{ t('common.english') }}</option></select></label>
     <button type="button" class="settings-card settings-button-card" @click="router.push('/connect')"><small>{{ t('settings.source') }}</small><strong>{{ t('settings.switchSource') }}</strong><span>{{ t('settings.switchDescription') }}</span></button>
     <button type="button" class="settings-card settings-button-card" @click="router.push('/downloads')"><small>{{ t('settings.cache') }}</small><strong>{{ t('settings.manageCache') }}</strong><span>{{ t('settings.cacheDescription') }}</span></button>
-    <button type="button" v-if="app.canInstall" class="settings-card settings-button-card" @click="app.install()"><small>PWA</small><strong>{{ t('settings.install') }}</strong><span>{{ t('settings.installDescription') }}</span></button>
+    <button type="button" v-if="app.canInstall" class="settings-card settings-button-card" @click="app.install()"><small>APP</small><strong>{{ t('settings.install') }}</strong><span>{{ t('settings.installDescription') }}</span></button>
     <div class="settings-card"><small>{{ t('settings.about') }}</small><strong>LM Music</strong><span>{{ t('settings.version', { version: appVersion }) }} · {{ t('settings.aboutDescription') }}</span></div>
     <p v-if="app.serviceWorkerError" class="form-error" role="alert">{{ app.serviceWorkerError }}</p>
     <button type="button" v-if="auth.isConnected" class="danger-button" @click="disconnect">{{ t('settings.disconnect') }}</button>
