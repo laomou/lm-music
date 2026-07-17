@@ -171,16 +171,24 @@ export const useDownloadsStore = defineStore('downloads', {
     },
     async remove(track: DownloadedTrack) {
       this.error = ''
-      await deleteDownloadedTrack(track.id)
-      await this.refresh()
+      try {
+        await deleteDownloadedTrack(track.id)
+        await this.refresh()
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : t('error.deleteFailed')
+      }
     },
     async clearAll() {
       this.error = ''
       this.controllers.forEach((controller) => controller.abort())
       this.controllers.clear()
       this.tasks = this.tasks.map((task) => task.status === 'downloading' ? { ...task, status: 'cancelled' } : task)
-      await clearServerOfflineData(this.serverId, false)
-      await this.refresh()
+      try {
+        await clearServerOfflineData(this.serverId, false)
+        await this.refresh()
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : t('error.clearFailed')
+      }
     },
   },
 })

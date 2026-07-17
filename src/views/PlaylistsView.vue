@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useLibraryStore } from '@/stores/library'
 import { usePlayerStore } from '@/stores/player'
 import { getProviderForSession } from '@/services/providers'
-import { Download, Play, Settings } from '@lucide/vue'
+import { Download, Play, RefreshCw, Settings } from '@lucide/vue'
 import { t } from '@/i18n'
 import CoverImage from '@/components/CoverImage.vue'
 
@@ -56,8 +56,11 @@ function resume() {
 }
 
 function playRecent(trackId: string) {
-  const track = [...player.recentTracks, ...player.favoriteTracks].find((item) => item.id === trackId)
-  if (!track) return
+  const saved = [...player.recentTracks, ...player.favoriteTracks].find((item) => item.id === trackId)
+  if (!saved) return
+  const libraryTrack = library.allTracks.find((item) => item.id === trackId)
+  const track = libraryTrack ?? saved
+  if (!track.streamUrl) return
   const playlist = library.playlists.find((item) => item.tracks.some((item) => item.id === track.id))
   player.play(track, playlist?.tracks ?? [track])
   router.push('/now-playing')
@@ -87,7 +90,7 @@ function clearRecent() {
 
 <template>
   <section class="page playlists-page" :aria-busy="library.loading">
-    <header class="topbar"><div><p class="eyebrow">LM MUSIC</p><h1>{{ t('library.title') }}</h1></div><div class="header-actions"><button type="button" class="settings-button" :aria-label="t('common.downloads')" @click="openDownloads"><Download /></button><button type="button" class="settings-button" :aria-label="t('common.settings')" @click="router.push('/settings')"><Settings /></button></div></header>
+    <header class="topbar"><div><p class="eyebrow">LM MUSIC</p><h1>{{ t('library.title') }}</h1></div><div class="header-actions"><button type="button" class="settings-button" :aria-label="t('library.refresh')" :disabled="library.loading" @click="library.fetchPlaylists()"><RefreshCw /></button><button type="button" class="settings-button" :aria-label="t('common.downloads')" @click="openDownloads"><Download /></button><button type="button" class="settings-button" :aria-label="t('common.settings')" @click="router.push('/settings')"><Settings /></button></div></header>
 
     <button type="button" v-if="player.currentTrack" class="resume-card" :aria-label="t('library.resumeTrack', { title: player.currentTrack.title })" @click="resume">
       <CoverImage :src="player.currentTrack.coverUrl" alt="" />

@@ -123,12 +123,17 @@ export async function downloadTrack(serverId: string, track: Track, playlistId?:
   await cache.put(track.streamUrl, cachedAudioResponse)
 
   let coverCacheKey: string | undefined
-  if (track.coverUrl) {
-    const coverResponse = await fetch(track.coverUrl, { signal })
-    if (coverResponse.ok) {
-      await cache.put(track.coverUrl, coverResponse.clone())
-      coverCacheKey = track.coverUrl
+  try {
+    if (track.coverUrl) {
+      const coverResponse = await fetch(track.coverUrl, { signal })
+      if (coverResponse.ok) {
+        await cache.put(track.coverUrl, coverResponse.clone())
+        coverCacheKey = track.coverUrl
+      }
     }
+  } catch (error) {
+    await cache.delete(track.streamUrl)
+    throw error
   }
 
   const record: DownloadedTrack = {

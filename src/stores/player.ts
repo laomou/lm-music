@@ -3,6 +3,7 @@ import type { RepeatMode, Track } from '@/types/music'
 
 const STORAGE_KEY = 'lm-music-player'
 const SETTINGS_KEY = 'lm-music-player-settings'
+let playbackPersistTimer = 0
 
 type PersistedPlayer = {
   currentTrack?: Track | null
@@ -60,13 +61,16 @@ export const usePlayerStore = defineStore('player', {
       this.persistSettings()
     },
     persistPlayback() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      window.clearTimeout(playbackPersistTimer)
+      const write = () => localStorage.setItem(STORAGE_KEY, JSON.stringify({
         currentTrack: this.currentTrack,
         queue: this.queue,
         currentIndex: this.currentIndex,
         recentTracks: this.recentTracks,
         favoriteTracks: this.favoriteTracks,
       }))
+      if (this.queue.length > 200) playbackPersistTimer = window.setTimeout(write, 300)
+      else write()
     },
     persistSettings() {
       this.lastPersistedTime = this.currentTime
@@ -179,6 +183,7 @@ export const usePlayerStore = defineStore('player', {
         this.play(track, [track])
         return
       }
+      if (this.queue.at(-1)?.id === track.id) return
       this.queue = [...this.queue, track]
       this.persist()
     },
@@ -242,7 +247,8 @@ export const usePlayerStore = defineStore('player', {
       this.duration = 0
       this.isPlaying = false
       this.error = ''
-      this.recentTracks = []
+      this.recentTracks = this.recentTracks.map((track) => ({ ...track, streamUrl: '' }))
+      this.favoriteTracks = this.favoriteTracks.map((track) => ({ ...track, streamUrl: '' }))
       this.persist()
     },
   },
