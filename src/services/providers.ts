@@ -1,5 +1,6 @@
 import { AudiusClient } from '@/services/audius/client'
 import { JellyfinClient } from '@/services/jellyfin/client'
+import { LocalFolderClient } from '@/services/local/client'
 import { NavidromeClient } from '@/services/navidrome/client'
 import type { LyricLine, MusicProviderType, MusicSession, Playlist } from '@/types/music'
 import { t } from '@/i18n'
@@ -70,7 +71,22 @@ const audius: MusicProvider = {
   },
 }
 
-export const musicProviders = [jellyfin, subsonic, audius] as const
+const local: MusicProvider = {
+  id: 'local',
+  label: 'Local Folder',
+  subtitleKey: 'provider.localSubtitle',
+  requiresCredentials: false,
+  supportsOfflineDownload: false,
+  async connect() {
+    return LocalFolderClient.connect()
+  },
+  createClient(session) {
+    if (session.provider !== 'local') throw new Error(t('provider.invalidSession', { provider: 'Local Folder' }))
+    return new LocalFolderClient()
+  },
+}
+
+export const musicProviders = [jellyfin, subsonic, audius, local] as const
 
 export function getMusicProvider(provider: MusicProviderType) {
   const definition = musicProviders.find((item) => item.id === provider)

@@ -18,3 +18,28 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 declare const __APP_VERSION__: string
+
+interface FileSystemHandlePermissionDescriptor {
+  mode?: 'read' | 'readwrite'
+}
+
+interface FileSystemHandle {
+  kind: 'file' | 'directory'
+  name: string
+  queryPermission?: (descriptor?: FileSystemHandlePermissionDescriptor) => Promise<PermissionState>
+  requestPermission?: (descriptor?: FileSystemHandlePermissionDescriptor) => Promise<PermissionState>
+}
+
+interface FileSystemFileHandle extends FileSystemHandle {
+  kind: 'file'
+  getFile: () => Promise<File>
+}
+
+interface FileSystemDirectoryHandle extends FileSystemHandle {
+  kind: 'directory'
+  entries: () => AsyncIterableIterator<[string, FileSystemDirectoryHandle | FileSystemFileHandle]>
+}
+
+interface Window {
+  showDirectoryPicker?: () => Promise<FileSystemDirectoryHandle>
+}

@@ -58,5 +58,11 @@ export type AudiusSession = {
   username: 'Audius'
 }
 
-export type MusicSession = JellyfinSession | SubsonicSession | AudiusSession
+export type LocalFolderSession = {
+  provider: 'local'
+  serverUrl: 'local://folder'
+  username: string
+}
+
+export type MusicSession = JellyfinSession | SubsonicSession | AudiusSession | LocalFolderSession
 export type MusicProviderType = MusicSession['provider']
