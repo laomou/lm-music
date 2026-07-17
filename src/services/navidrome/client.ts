@@ -103,6 +103,11 @@ export class NavidromeClient {
     return (result.searchResult3?.song ?? []).map((song) => this.toTrack(song))
   }
 
+  async search(query: string): Promise<Track[]> {
+    const result = await this.request<{ searchResult3?: { song?: SubsonicSong[] } }>('search3', { query, songCount: '30', artistCount: '0', albumCount: '0' })
+    return (result.searchResult3?.song ?? []).map((song) => this.toTrack(song))
+  }
+
   async getLyrics(trackId: string): Promise<LyricLine[]> {
     const result = await this.request<{ lyrics?: SubsonicLyrics }>('getLyrics', { id: trackId })
     const lyrics = result.lyrics

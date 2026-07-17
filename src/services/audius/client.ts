@@ -51,6 +51,11 @@ export class AudiusClient {
     return []
   }
 
+  async search(query: string): Promise<Track[]> {
+    const results = await this.request<AudiusTrack[]>(`/tracks/search?query=${encodeURIComponent(query)}&limit=30`)
+    return results.map((track) => this.toTrack(track)).filter(Boolean) as Track[]
+  }
+
   private async request<T>(path: string): Promise<T> {
     const response = await fetch(`${API_URL}${path}`)
     if (!response.ok) throw new Error(t('error.providerRequestFailed', { provider: 'Audius', status: response.status }))

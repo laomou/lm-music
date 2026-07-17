@@ -36,7 +36,7 @@ function groupTracks(type: LibraryCollectionType, tracks: Track[]): LibraryColle
 }
 
 export const useLibraryStore = defineStore('library', {
-  state: () => ({ playlists: [] as Playlist[], loading: false, error: '', source: 'network' as 'network' | 'cache', fetchToken: 0 }),
+  state: () => ({ playlists: [] as Playlist[], searchResults: [] as Track[], loading: false, searchLoading: false, error: '', source: 'network' as 'network' | 'cache', fetchToken: 0, searchToken: 0 }),
   getters: {
     offlinePlaylists: (state) => state.playlists.filter((playlist) => playlist.tracks.length > 0),
     allTracks: (state) => uniqueTracks(state.playlists),
@@ -53,8 +53,11 @@ export const useLibraryStore = defineStore('library', {
   actions: {
     clear() {
       this.fetchToken += 1
+      this.searchToken += 1
       this.playlists = []
+      this.searchResults = []
       this.loading = false
+      this.searchLoading = false
       this.error = ''
       this.source = 'network'
     },
@@ -113,6 +116,29 @@ export const useLibraryStore = defineStore('library', {
         } catch {
           // Lyrics are optional. Keep playback and the rest of the library usable.
         }
+      }
+    },
+    async searchTracks(query: string) {
+      const token = ++this.searchToken
+      if (!query.trim()) {
+        this.searchResults = []
+        this.searchLoading = false
+        return
+      }
+      const auth = useAuthStore()
+      if (!auth.session || !navigator.onLine) return
+      this.searchLoading = true
+      try {
+        const client = getProviderForSession(auth.session).createClient(auth.session)
+        if (!client.search) return
+        const results = await client.search(query.trim())
+        if (token !== this.searchToken) return
+        this.searchResults = results
+      } catch {
+        if (token !== this.searchToken) return
+        this.searchResults = []
+      } finally {
+        if (token === this.searchToken) this.searchLoading = false
       }
     },
   },

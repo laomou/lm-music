@@ -2,7 +2,7 @@ import { AudiusClient } from '@/services/audius/client'
 import { JellyfinClient } from '@/services/jellyfin/client'
 import { LocalFolderClient } from '@/services/local/client'
 import { NavidromeClient } from '@/services/navidrome/client'
-import type { LyricLine, MusicProviderType, MusicSession, Playlist } from '@/types/music'
+import type { LyricLine, MusicProviderType, MusicSession, Playlist, Track } from '@/types/music'
 import { t } from '@/i18n'
 
 type ProviderCredentials = {
@@ -14,6 +14,7 @@ type ProviderCredentials = {
 type MusicProviderClient = {
   getPlaylists(): Promise<Playlist[]>
   getLyrics(trackId: string): Promise<LyricLine[]>
+  search?(query: string): Promise<Track[]>
 }
 
 export type MusicProvider = {

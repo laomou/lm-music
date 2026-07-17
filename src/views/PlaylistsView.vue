@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useLibraryStore } from '@/stores/library'
@@ -44,7 +44,17 @@ const artists = computed(() => {
 const matchingTracks = computed(() => {
   const query = normalizedSearch.value
   if (!query) return []
-  return library.allTracks.filter((track) => `${track.title} ${track.artist} ${track.album ?? ''}`.toLowerCase().includes(query)).slice(0, 24)
+  const local = library.allTracks.filter((track) => `${track.title} ${track.artist} ${track.album ?? ''}`.toLowerCase().includes(query))
+  const localIds = new Set(local.map((track) => track.id))
+  const remote = library.searchResults.filter((track) => !localIds.has(track.id))
+  return [...local, ...remote].slice(0, 30)
+})
+
+let searchTimer = 0
+watch(normalizedSearch, (query) => {
+  window.clearTimeout(searchTimer)
+  if (!query) { library.searchResults = []; return }
+  searchTimer = window.setTimeout(() => library.searchTracks(query), 300)
 })
 
 function openDownloads() { router.push('/downloads') }
@@ -99,7 +109,7 @@ function clearRecent() {
 
     <label v-if="library.playlists.length || player.recentTracks.length || player.favoriteTracks.length" class="library-search"><span>{{ t('library.searchPlaceholder') }}</span><input v-model="search" type="search" :placeholder="t('library.searchPlaceholder')" /></label>
 
-    <div v-if="matchingTracks.length" class="section-heading"><h2>{{ t('library.matchingTracks') }}</h2></div>
+    <div v-if="matchingTracks.length || library.searchLoading" class="section-heading"><h2>{{ t('library.matchingTracks') }}</h2><span v-if="library.searchLoading">{{ t('library.searching') }}</span></div>
     <div v-if="matchingTracks.length" class="recent-tracks">
       <button type="button" v-for="track in matchingTracks" :key="track.id" class="recent-track" :aria-current="player.currentTrack?.id === track.id ? 'true' : undefined" :aria-label="player.currentTrack?.id === track.id ? t('player.currentlyPlaying', { title: track.title }) : t('playlist.playTrack', { title: track.title })" @click="playSearchTrack(track.id)">
         <CoverImage :src="track.coverUrl" alt="" /><span><strong :title="track.title">{{ track.title }}</strong><small :title="track.artist">{{ track.artist }}</small></span><Play :size="16" fill="currentColor" />

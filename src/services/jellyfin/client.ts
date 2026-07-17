@@ -94,6 +94,19 @@ export class JellyfinClient {
     return result.Items.filter((item) => item.RunTimeTicks !== undefined).map((item) => this.toTrack(item))
   }
 
+  async search(query: string): Promise<Track[]> {
+    const params = new URLSearchParams({
+      UserId: this.session.userId,
+      IncludeItemTypes: 'Audio',
+      Recursive: 'true',
+      SearchTerm: query,
+      Fields: 'PrimaryImageAspectRatio,AlbumPrimaryImageTag',
+      Limit: '30',
+    })
+    const result = await this.request<JellyfinItemsResponse>(`/Users/${this.session.userId}/Items?${params}`)
+    return result.Items.filter((item) => item.RunTimeTicks !== undefined).map((item) => this.toTrack(item))
+  }
+
   imageUrl(itemId: string, tag?: string) {
     if (!tag) return undefined
     const query = new URLSearchParams({ maxWidth: '800', quality: '90', api_key: this.session.accessToken })
