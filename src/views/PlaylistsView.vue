@@ -49,7 +49,7 @@ const matchingTracks = computed(() => {
 
 function openDownloads() { router.push('/downloads') }
 
-onMounted(() => library.fetchPlaylists())
+onMounted(() => { if (!library.playlists.length) library.fetchPlaylists() })
 
 function resume() {
   if (player.currentTrack) router.push('/now-playing')
