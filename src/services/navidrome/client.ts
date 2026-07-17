@@ -63,7 +63,7 @@ export class NavidromeClient {
 
   async getPlaylists(): Promise<Playlist[]> {
     const result = await this.request<{ playlists?: { playlist?: SubsonicPlaylist[] } }>('getPlaylists')
-    return Promise.all((result.playlists?.playlist ?? []).map(async (playlist) => {
+    const playlists = await Promise.all((result.playlists?.playlist ?? []).map(async (playlist) => {
       const tracks = await this.getPlaylistTracks(playlist.id)
       return {
         id: playlist.id,
@@ -72,6 +72,17 @@ export class NavidromeClient {
         tracks,
       }
     }))
+    const playablePlaylists = playlists.filter((playlist) => playlist.tracks.length > 0)
+    if (playablePlaylists.length) return playablePlaylists
+
+    const tracks = await this.getAllTracks()
+    return tracks.length ? [{
+      id: 'navidrome-all-songs',
+      name: t('navidrome.allSongs'),
+      description: t('navidrome.allSongsDescription'),
+      coverUrl: tracks[0]?.coverUrl,
+      tracks,
+    }] : playlists
   }
 
   async getPlaylistTracks(playlistId: string): Promise<Track[]> {
@@ -85,6 +96,11 @@ export class NavidromeClient {
 
   coverUrl(coverArtId: string) {
     return this.endpointUrl('getCoverArt', { id: coverArtId, size: '800' })
+  }
+
+  async getAllTracks(): Promise<Track[]> {
+    const result = await this.request<{ searchResult3?: { song?: SubsonicSong[] } }>('search3', { query: '', songCount: '500', artistCount: '0', albumCount: '0' })
+    return (result.searchResult3?.song ?? []).map((song) => this.toTrack(song))
   }
 
   async getLyrics(trackId: string): Promise<LyricLine[]> {
