@@ -1,120 +1,195 @@
 # LM Music
 
-LM Music 是一个面向浏览器和移动端安装场景的音乐播放器，支持连接个人音乐服务、浏览公开音乐目录，也支持播放本地音乐文件夹。
+LM Music 是一个浏览器音乐播放器，支持 Jellyfin、Navidrome / OpenSubsonic、Audius，以及本地音乐文件夹。
 
-在线体验：<https://laomou.github.io/lm-music/>
-
-## 功能特性
-
-- **PWA 应用体验**：可安装到桌面或移动端主屏幕，支持离线资源缓存和新版本提示。
-- **多音乐来源**：支持 Jellyfin、Navidrome / OpenSubsonic、Audius 公开音乐目录，以及本地音乐文件夹。
-- **播放器能力**：播放 / 暂停、上一首 / 下一首、随机播放、循环模式、音量控制、播放队列管理。
-- **歌词显示**：支持同步歌词展示和点击歌词跳转播放进度；本地文件夹支持同名 `.lrc` 歌词文件。
-- **离线下载**：支持可下载来源的单曲和歌单缓存，显示下载进度、存储占用和浏览器存储配额。
-- **系统媒体控制**：支持 Media Session，锁屏、通知栏、耳机控制等系统媒体入口可操作播放。
-- **多语言**：内置中文和英文，语言选择会持久化保存。
-- **资料库浏览**：支持歌单、专辑、艺术家、本地收藏、最近播放和搜索匹配歌曲。
-- **移动端适配**：底部安全区域、应用图标、安装元信息和应用快捷入口已适配。
+在线地址：<https://laomou.github.io/lm-music/>
 
 ## 支持的音乐来源
 
-| 来源 | 说明 | 离线下载 |
+| 来源 | 是否需要账号 | 说明 |
 | --- | --- | --- |
-| Jellyfin | 个人媒体服务器 | 支持 |
-| Navidrome / OpenSubsonic | 兼容 OpenSubsonic API 的音乐服务 | 支持 |
-| Audius | 公开音乐目录，无需账号 | 仅在线播放 |
-| 本地音乐文件夹 | 通过浏览器选择本地文件夹，文件不上传 | 不需要 |
+| Jellyfin | 需要 | 连接自己的 Jellyfin 音乐库。 |
+| Navidrome / OpenSubsonic | 需要 | 连接兼容 OpenSubsonic API 的音乐服务。 |
+| Audius | 不需要 | 浏览 Audius 公开音乐目录，仅在线播放。 |
+| 本地音乐文件夹 | 不需要 | 从浏览器选择本机音乐文件夹，文件不会上传。 |
 
-> 注意：Audius 是公开流媒体目录，不提供离线下载。本地音乐文件夹主要依赖浏览器 File System Access API，推荐使用 Chrome 或 Edge。Jellyfin / Navidrome 是否能正常播放，还取决于服务器 HTTPS / 跨域、音频格式和浏览器解码能力。
+## 快速使用
 
-## 本地开发
+1. 打开 LM Music。
+2. 在连接页选择音乐来源。
+3. 按来源填写信息或选择本地文件夹。
+4. 进入音乐库后，可以浏览歌单、专辑、艺术家、收藏和最近播放。
+5. 点击歌曲即可播放。
 
-推荐使用仓库自带的 Node 环境路径，或使用本机兼容版本的 Node.js。
+## 连接 Jellyfin
 
-```bash
-npm ci
-npm run dev
-```
+1. 在音乐来源里选择 `Jellyfin`。
+2. 填写服务器地址，例如：
 
-常用命令：
+   ```text
+   https://jellyfin.example.com
+   ```
 
-```bash
-npm run typecheck
-npm run build
-npm run preview
-```
+3. 输入 Jellyfin 用户名和密码。
+4. 点击连接。
 
-## GitHub Pages 部署
+注意：
 
-项目使用 GitHub Actions 自动部署到 GitHub Pages：
+- 如果 LM Music 是通过 HTTPS 打开的，Jellyfin 也需要使用 HTTPS。
+- 浏览器会阻止 HTTPS 页面访问 HTTP 音乐服务器。
+- 如果 Jellyfin 没有播放列表，LM Music 会尝试显示“Jellyfin 所有歌曲”。
+- 某些音频格式可能需要 Jellyfin 转码为浏览器可播放格式。
 
-```text
-.github/workflows/deploy-pages.yml
-```
+## 连接 Navidrome / OpenSubsonic
 
-部署时会设置：
+1. 在音乐来源里选择 `Navidrome`。
+2. 填写服务器地址，例如：
 
-```bash
-BASE_PATH=/<repository-name>/
-```
+   ```text
+   https://music.example.com
+   ```
 
-这用于保证 Vite 静态资源、PWA Manifest 和 Service Worker 在 GitHub Pages 子路径下正常工作。
+3. 输入用户名和密码。
+4. 点击连接。
 
-## 连接注意事项
+注意：
 
-### Jellyfin
+- 服务端需要允许浏览器访问 API 和音频流。
+- 如果通过 HTTPS 打开 LM Music，Navidrome 服务器也建议使用 HTTPS。
 
-- 服务器地址示例：`https://jellyfin.example.com`
-- 需要用户名和密码。
-- 如果浏览器无法播放某些音频，可能需要 Jellyfin 为浏览器转码。
-- 如果请求失败，请检查服务器是否允许当前站点跨域访问。
+## 使用 Audius
 
-### Navidrome / OpenSubsonic
+1. 在音乐来源里选择 `Audius`。
+2. 点击浏览 Audius。
+3. 无需账号即可播放公开音乐。
 
-- 服务器地址示例：`https://music.example.com`
-- 使用 OpenSubsonic / Subsonic API 登录。
-- 需要服务端允许浏览器访问对应 API 和音频流。
+注意：
 
-### Audius
+- Audius 仅支持在线播放。
+- Audius 不支持离线下载。
+- 公共节点偶尔可能不可用，播放失败时可以稍后重试或换一首歌。
 
-- 无需账号。
-- 仅支持在线播放。
-- 公共节点偶尔可能不可用，播放失败时可稍后重试或切换歌曲。
+## 使用本地音乐文件夹
 
-### 本地音乐文件夹
+1. 在音乐来源里选择 `Local Folder`。
+2. 点击选择本地文件夹。
+3. 浏览器会弹出文件夹选择器。
+4. 选择包含音乐文件的文件夹。
+5. LM Music 会递归扫描其中的音频文件并生成本地歌单。
 
-- 在连接页选择 `Local Folder` / `本地音乐文件夹`。
-- 浏览器会弹出文件夹选择器，LM Music 会递归扫描其中的音频文件。
-- 支持常见音频格式：`mp3`、`flac`、`m4a`、`aac`、`ogg`、`opus`、`wav`、`webm`。
-- 支持同目录同名 `.lrc` 歌词文件，例如：
-
-  ```text
-  晴天.flac
-  晴天.lrc
-  ```
-
-- 文件只在本机浏览器中读取，不会上传到服务器。
-- 刷新或重新打开后，浏览器可能要求重新授权访问该文件夹。
-
-## 文档
-
-设计和实现说明见：
+支持的音频格式：
 
 ```text
-docs/design.md
+mp3, flac, m4a, aac, ogg, opus, wav, webm
 ```
 
-## 技术栈
+本地歌词支持同目录同名 `.lrc` 文件，例如：
 
-- Vue 3
-- TypeScript
-- Vite
-- Pinia
-- Vue Router
-- Vue I18n
-- vite-plugin-pwa
-- Lucide Icons
+```text
+晴天.flac
+晴天.lrc
+```
 
-## License
+注意：
 
-目前未声明开源许可证。若需要公开复用，请先补充 LICENSE。
+- 本地文件不会上传到服务器。
+- 本地文件夹功能主要支持 Chrome / Edge。
+- Safari / Firefox 对选择文件夹支持较弱。
+- 重新打开应用后，浏览器可能要求重新授权访问文件夹。
+
+## 播放器功能
+
+- 播放 / 暂停
+- 上一首 / 下一首
+- 随机播放
+- 列表循环 / 单曲循环
+- 音量控制 / 静音
+- 播放队列
+- 添加歌曲到队列
+- 移除队列歌曲
+- 清空待播队列
+- 拖拽排序播放队列
+- 收藏歌曲
+- 最近播放
+- 同步歌词显示
+- 点击歌词跳转播放进度
+
+## 离线内容
+
+Jellyfin 和 Navidrome 支持下载歌曲到浏览器缓存。
+
+可以在歌单或歌曲列表中点击下载按钮。
+
+下载页可以查看：
+
+- 已下载歌曲
+- 下载任务
+- 下载进度
+- 音乐缓存大小
+- 浏览器存储占用和配额
+- 清除单首或全部离线内容
+
+注意：
+
+- Audius 不支持离线下载。
+- 本地音乐文件夹不需要离线下载，因为文件已经在本机。
+- 浏览器可能会在存储空间不足时清理缓存。
+
+## 快捷键
+
+| 快捷键 | 功能 |
+| --- | --- |
+| Space | 播放 / 暂停 |
+| ← | 后退 5 秒 |
+| → | 前进 5 秒 |
+| M | 静音 / 取消静音 |
+| N | 下一首 |
+| P | 上一首 / 回到当前歌曲开头 |
+
+快捷键不会在输入框、下拉框、按钮或可编辑区域中触发。
+
+## 安装到桌面或手机
+
+浏览器支持时，可以在设置页点击安装入口，将 LM Music 添加到桌面或手机主屏幕。
+
+安装后可以像普通应用一样打开。
+
+## 常见问题
+
+### 为什么连接 HTTP Jellyfin 会失败？
+
+如果 LM Music 是通过 HTTPS 打开的，例如 GitHub Pages，那么浏览器会阻止它访问 HTTP 音乐服务器。
+
+解决方法：
+
+- 给 Jellyfin / Navidrome 配置 HTTPS；或
+- 在本地 HTTP 环境打开 LM Music。
+
+### 为什么 Jellyfin 有歌但没有歌单？
+
+LM Music 会优先显示 Jellyfin 播放列表。
+
+如果没有可用播放列表，会尝试显示：
+
+```text
+Jellyfin 所有歌曲
+```
+
+### 为什么有些歌曲无法播放？
+
+可能原因：
+
+- 浏览器不支持该音频格式。
+- Jellyfin / Navidrome 需要转码。
+- 服务器没有开启跨域访问。
+- HTTPS 页面访问了 HTTP 音乐流。
+
+### 为什么封面不显示？
+
+可能原因：
+
+- 音乐文件没有封面。
+- Jellyfin / Navidrome 没有对应图片。
+- HTTP 图片被 HTTPS 页面阻止。
+
+这种情况下 LM Music 会显示应用图标作为默认封面。
