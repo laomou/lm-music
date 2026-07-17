@@ -53,17 +53,48 @@ function cleanTitle(name: string) {
   return name.replace(/\.[^.]+$/, '')
 }
 
+function parseLrc(value: string): LyricLine[] {
+  const lines = value.split(/\r?\n/)
+  const parsed: LyricLine[] = []
+  for (const line of lines) {
+    const matches = [...line.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)]
+    const text = line.replace(/\[\d+:\d+(?:\.\d+)?\]/g, '').trim()
+    for (const match of matches) parsed.push({ time: Number(match[1]) * 60 + Number(match[2]), text })
+  }
+  return parsed.sort((left, right) => left.time - right.time)
+}
+
+async function readLyrics(handle?: FileSystemFileHandle) {
+  if (!handle) return []
+  try {
+    return parseLrc(await (await handle.getFile()).text())
+  } catch {
+    return []
+  }
+}
+
 async function scanDirectory(handle: FileSystemDirectoryHandle, path: string[] = []): Promise<Track[]> {
   const tracks: Track[] = []
+  const audioFiles: FileSystemFileHandle[] = []
+  const lyricsFiles = new Map<string, FileSystemFileHandle>()
+
   for await (const [name, entry] of handle.entries()) {
     if (entry.kind === 'directory') {
       tracks.push(...await scanDirectory(entry, [...path, name]))
       continue
     }
-    if (!isAudioFile(name)) continue
+    if (name.toLowerCase().endsWith('.lrc')) {
+      lyricsFiles.set(cleanTitle(name).toLowerCase(), entry)
+      continue
+    }
+    if (isAudioFile(name)) audioFiles.push(entry)
+  }
+
+  for (const entry of audioFiles) {
     const file = await entry.getFile()
     const title = cleanTitle(file.name)
     const folderArtist = path.at(-1)
+    const lyrics = await readLyrics(lyricsFiles.get(title.toLowerCase()))
     tracks.push({
       id: `local:${[...path, file.name].join('/')}:${file.lastModified}:${file.size}`,
       title,
@@ -71,7 +102,7 @@ async function scanDirectory(handle: FileSystemDirectoryHandle, path: string[] =
       album: path.at(-2),
       duration: 0,
       streamUrl: URL.createObjectURL(file),
-      lyrics: [],
+      lyrics,
       allowOfflineDownload: false,
     })
   }
