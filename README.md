@@ -1,195 +1,210 @@
 # LM Music
 
-LM Music 是一个浏览器音乐播放器，支持 Jellyfin、Navidrome / OpenSubsonic、Audius，以及本地音乐文件夹。
+[中文说明](./README_zh.md)
 
-在线地址：<https://laomou.github.io/lm-music/>
+LM Music is a browser music player for Jellyfin, Navidrome / OpenSubsonic, Audius, and local music folders.
 
-## 支持的音乐来源
+Live site: <https://laomou.github.io/lm-music/>
 
-| 来源 | 是否需要账号 | 说明 |
+## Supported music sources
+
+| Source | Account required | Notes |
 | --- | --- | --- |
-| Jellyfin | 需要 | 连接自己的 Jellyfin 音乐库。 |
-| Navidrome / OpenSubsonic | 需要 | 连接兼容 OpenSubsonic API 的音乐服务。 |
-| Audius | 不需要 | 浏览 Audius 公开音乐目录，仅在线播放。 |
-| 本地音乐文件夹 | 不需要 | 从浏览器选择本机音乐文件夹，文件不会上传。 |
+| Jellyfin | Yes | Connect your own Jellyfin music library. |
+| Navidrome / OpenSubsonic | Yes | Connect any music server compatible with the OpenSubsonic API. |
+| Audius | No | Browse the public Audius catalog. Streaming only. |
+| Local music folder | No | Choose a local music folder in the browser. Files are never uploaded. |
 
-## 快速使用
+## Quick start
 
-1. 打开 LM Music。
-2. 在连接页选择音乐来源。
-3. 按来源填写信息或选择本地文件夹。
-4. 进入音乐库后，可以浏览歌单、专辑、艺术家、收藏和最近播放。
-5. 点击歌曲即可播放。
+1. Open LM Music.
+2. Choose a music source on the connection page.
+3. Enter source details or choose a local folder.
+4. Browse playlists, albums, artists, favorites, and recently played tracks.
+5. Click a track to play.
 
-## 连接 Jellyfin
+## Connect Jellyfin
 
-1. 在音乐来源里选择 `Jellyfin`。
-2. 填写服务器地址，例如：
+1. Choose `Jellyfin` as the music source.
+2. Enter the server URL, for example:
 
    ```text
    https://jellyfin.example.com
    ```
 
-3. 输入 Jellyfin 用户名和密码。
-4. 点击连接。
+3. Enter your Jellyfin username and password.
+4. Click connect.
 
-注意：
+Notes:
 
-- 如果 LM Music 是通过 HTTPS 打开的，Jellyfin 也需要使用 HTTPS。
-- 浏览器会阻止 HTTPS 页面访问 HTTP 音乐服务器。
-- 如果 Jellyfin 没有播放列表，LM Music 会尝试显示“Jellyfin 所有歌曲”。
-- 某些音频格式可能需要 Jellyfin 转码为浏览器可播放格式。
+- If LM Music is opened over HTTPS, Jellyfin must also be served over HTTPS.
+- Browsers block HTTPS pages from loading HTTP music servers.
+- If Jellyfin has no usable playlists, LM Music tries to show `All Jellyfin tracks`.
+- Some audio formats may require Jellyfin transcoding for browser playback.
 
-## 连接 Navidrome / OpenSubsonic
+## Connect Navidrome / OpenSubsonic
 
-1. 在音乐来源里选择 `Navidrome`。
-2. 填写服务器地址，例如：
+1. Choose `Navidrome` as the music source.
+2. Enter the server URL, for example:
 
    ```text
    https://music.example.com
    ```
 
-3. 输入用户名和密码。
-4. 点击连接。
+3. Enter your username and password.
+4. Click connect.
 
-注意：
+Notes:
 
-- 服务端需要允许浏览器访问 API 和音频流。
-- 如果通过 HTTPS 打开 LM Music，Navidrome 服务器也建议使用 HTTPS。
+- The server must allow browser access to the API and audio streams.
+- If LM Music is opened over HTTPS, the Navidrome server should also use HTTPS.
 
-## 使用 Audius
+## Use Audius
 
-1. 在音乐来源里选择 `Audius`。
-2. 点击浏览 Audius。
-3. 无需账号即可播放公开音乐。
+1. Choose `Audius` as the music source.
+2. Click browse Audius.
+3. Play public music without an account.
 
-注意：
+Notes:
 
-- Audius 仅支持在线播放。
-- Audius 不支持离线下载。
-- 公共节点偶尔可能不可用，播放失败时可以稍后重试或换一首歌。
+- Audius is streaming only.
+- Audius does not support offline downloads.
+- Public nodes may occasionally be unavailable. If playback fails, try again later or choose another track.
 
-## 使用本地音乐文件夹
+## Use a local music folder
 
-1. 在音乐来源里选择 `Local Folder`。
-2. 点击选择本地文件夹。
-3. 浏览器会弹出文件夹选择器。
-4. 选择包含音乐文件的文件夹。
-5. LM Music 会递归扫描其中的音频文件并生成本地歌单。
+1. Choose `Local Folder` as the music source.
+2. Click choose local folder.
+3. The browser opens a folder picker.
+4. Choose a folder that contains music files.
+5. LM Music recursively scans audio files and creates a local playlist.
 
-支持的音频格式：
+Supported audio formats:
 
 ```text
 mp3, flac, m4a, aac, ogg, opus, wav, webm
 ```
 
-本地歌词支持同目录同名 `.lrc` 文件，例如：
+Local lyrics support same-folder `.lrc` files with the same base name, for example:
 
 ```text
-晴天.flac
-晴天.lrc
+Qing Tian.flac
+Qing Tian.lrc
 ```
 
-注意：
+Notes:
 
-- 本地文件不会上传到服务器。
-- 本地文件夹功能主要支持 Chrome / Edge。
-- Safari / Firefox 对选择文件夹支持较弱。
-- 重新打开应用后，浏览器可能要求重新授权访问文件夹。
+- Local files are never uploaded.
+- Local folder support works best in Chrome / Edge.
+- Safari / Firefox have limited folder picker support.
+- After reopening the app, the browser may ask for folder permission again.
 
-## 播放器功能
+## Library browsing
 
-- 播放 / 暂停
-- 上一首 / 下一首
-- 随机播放
-- 列表循环 / 单曲循环
-- 音量控制 / 静音
-- 播放队列
-- 添加歌曲到队列
-- 移除队列歌曲
-- 清空待播队列
-- 拖拽排序播放队列
-- 收藏歌曲
-- 最近播放
-- 同步歌词显示
-- 点击歌词跳转播放进度
+LM Music can browse:
 
-## 离线内容
+- Playlists
+- Albums
+- Artists
+- Matching tracks from search
+- Favorites
+- Recently played tracks
 
-Jellyfin 和 Navidrome 支持下载歌曲到浏览器缓存。
+Albums and artists are derived from the loaded tracks, so they work best with Jellyfin, Navidrome, and local folders.
 
-可以在歌单或歌曲列表中点击下载按钮。
+## Player features
 
-下载页可以查看：
+- Play / pause
+- Previous / next
+- Shuffle
+- Repeat all / repeat one
+- Volume control / mute
+- Playback queue
+- Add tracks to queue
+- Remove tracks from queue
+- Clear upcoming queue
+- Drag to reorder the playback queue
+- Local favorites
+- Recently played tracks
+- Synced lyrics display
+- Click lyrics to seek
 
-- 已下载歌曲
-- 下载任务
-- 下载进度
-- 音乐缓存大小
-- 浏览器存储占用和配额
-- 清除单首或全部离线内容
+## Offline content
 
-注意：
+Jellyfin and Navidrome support downloading tracks into the browser cache.
 
-- Audius 不支持离线下载。
-- 本地音乐文件夹不需要离线下载，因为文件已经在本机。
-- 浏览器可能会在存储空间不足时清理缓存。
+Use the download button in playlists or track lists.
 
-## 快捷键
+The downloads page shows:
 
-| 快捷键 | 功能 |
+- Downloaded tracks
+- Download tasks
+- Download progress
+- Music cache size
+- Browser storage usage and quota
+- Remove one or all offline downloads
+
+Notes:
+
+- Audius does not support offline downloads.
+- Local folders do not need offline downloads because files are already on the device.
+- Browsers may evict cached content when storage is low.
+
+## Keyboard shortcuts
+
+| Shortcut | Action |
 | --- | --- |
-| Space | 播放 / 暂停 |
-| ← | 后退 5 秒 |
-| → | 前进 5 秒 |
-| M | 静音 / 取消静音 |
-| N | 下一首 |
-| P | 上一首 / 回到当前歌曲开头 |
+| Space | Play / pause |
+| ← | Seek backward 5 seconds |
+| → | Seek forward 5 seconds |
+| M | Mute / unmute |
+| N | Next track |
+| P | Previous track / restart current track |
 
-快捷键不会在输入框、下拉框、按钮或可编辑区域中触发。
+Shortcuts do not trigger while focus is inside inputs, selects, buttons, links, or editable areas.
 
-## 安装到桌面或手机
+## Install on desktop or mobile
 
-浏览器支持时，可以在设置页点击安装入口，将 LM Music 添加到桌面或手机主屏幕。
+When supported by the browser, use the install entry in Settings to add LM Music to the desktop or home screen.
 
-安装后可以像普通应用一样打开。
+Installed apps open like regular standalone apps.
 
-## 常见问题
+## FAQ
 
-### 为什么连接 HTTP Jellyfin 会失败？
+### Why does an HTTP Jellyfin server fail to connect?
 
-如果 LM Music 是通过 HTTPS 打开的，例如 GitHub Pages，那么浏览器会阻止它访问 HTTP 音乐服务器。
+If LM Music is opened over HTTPS, such as GitHub Pages, the browser blocks access to HTTP music servers.
 
-解决方法：
+Fix it by either:
 
-- 给 Jellyfin / Navidrome 配置 HTTPS；或
-- 在本地 HTTP 环境打开 LM Music。
+- Serving Jellyfin / Navidrome over HTTPS; or
+- Opening LM Music from a local HTTP environment.
 
-### 为什么 Jellyfin 有歌但没有歌单？
+### Why does Jellyfin show tracks even when I have no playlists?
 
-LM Music 会优先显示 Jellyfin 播放列表。
+LM Music shows Jellyfin playlists first.
 
-如果没有可用播放列表，会尝试显示：
+If no usable playlists exist, it tries to show:
 
 ```text
-Jellyfin 所有歌曲
+All Jellyfin tracks
 ```
 
-### 为什么有些歌曲无法播放？
+### Why do some tracks fail to play?
 
-可能原因：
+Possible causes:
 
-- 浏览器不支持该音频格式。
-- Jellyfin / Navidrome 需要转码。
-- 服务器没有开启跨域访问。
-- HTTPS 页面访问了 HTTP 音乐流。
+- The browser does not support the audio format.
+- Jellyfin / Navidrome needs to transcode the track.
+- The server does not allow cross-origin browser access.
+- An HTTPS page tried to load an HTTP music stream.
 
-### 为什么封面不显示？
+### Why does artwork not appear?
 
-可能原因：
+Possible causes:
 
-- 音乐文件没有封面。
-- Jellyfin / Navidrome 没有对应图片。
-- HTTP 图片被 HTTPS 页面阻止。
+- The music file has no artwork.
+- Jellyfin / Navidrome has no matching image.
+- An HTTPS page blocked an HTTP image.
 
-这种情况下 LM Music 会显示应用图标作为默认封面。
+LM Music shows the app icon as fallback artwork in these cases.
