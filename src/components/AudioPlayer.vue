@@ -22,11 +22,15 @@ const library = useLibraryStore()
 const downloads = useDownloadsStore()
 const activeSessionKey = ref(sessionKey(auth.session))
 const fallbackAttempted = ref(false)
+let autoSkipTimer = 0
 const { onTimeUpdate, onLoadedMetadata } = useAudioPlayer(audio)
 useMediaSession()
 onMounted(() => player.restorePlayback())
 
-watch(() => player.currentTrack?.id, () => { fallbackAttempted.value = false })
+watch(() => player.currentTrack?.id, () => {
+  fallbackAttempted.value = false
+  window.clearTimeout(autoSkipTimer)
+})
 
 auth.$subscribe(() => {
   const nextSessionKey = sessionKey(auth.session)
@@ -65,6 +69,7 @@ async function handleError() {
       ? t('player.networkError')
       : t('player.codecError')
   player.setError(message)
+  if (player.hasNext) autoSkipTimer = window.setTimeout(() => player.next(), 3000)
 }
 
 async function handleEnded() {

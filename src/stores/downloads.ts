@@ -80,6 +80,7 @@ export const useDownloadsStore = defineStore('downloads', {
     },
     async downloadSingle(track: Track, playlistId?: string) {
       this.error = ''
+      if (!navigator.onLine) { this.error = t('error.downloadOffline'); return }
       const auth = useAuthStore()
       if (track.allowOfflineDownload === false || (auth.session && !getProviderForSession(auth.session).supportsOfflineDownload)) {
         this.error = t('error.streamingOnly')
@@ -114,6 +115,7 @@ export const useDownloadsStore = defineStore('downloads', {
     },
     async downloadPlaylist(playlist: Playlist) {
       this.error = ''
+      if (!navigator.onLine) { this.error = t('error.downloadOffline'); return }
       const auth = useAuthStore()
       if (!playlist.tracks.length) return
       if (playlist.tracks.some((track) => track.allowOfflineDownload === false) || (auth.session && !getProviderForSession(auth.session).supportsOfflineDownload)) {

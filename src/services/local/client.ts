@@ -99,6 +99,24 @@ async function scanDirectory(handle: FileSystemDirectoryHandle, path: string[] =
   return tracks.sort((left, right) => left.title.localeCompare(right.title))
 }
 
+export async function resolveLocalStreamUrl(trackId: string): Promise<string | null> {
+  const parts = trackId.replace(/^local:/, '').split(':')
+  parts.pop() // size
+  parts.pop() // lastModified
+  const relativePath = parts.join(':')
+  const segments = relativePath.split('/')
+  const handle = await getDirectoryHandle()
+  if (!handle || !await ensureReadPermission(handle)) return null
+  try {
+    let dir = handle
+    for (const segment of segments.slice(0, -1)) dir = await dir.getDirectoryHandle(segment)
+    const fileHandle = await dir.getFileHandle(segments.at(-1)!)
+    return URL.createObjectURL(await fileHandle.getFile())
+  } catch {
+    return null
+  }
+}
+
 export class LocalFolderClient {
   static async connect(): Promise<LocalFolderSession> {
     if (!window.showDirectoryPicker) throw new Error(t('error.localFolderUnsupported'))

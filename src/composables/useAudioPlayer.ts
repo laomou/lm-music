@@ -1,5 +1,6 @@
 import { onBeforeUnmount, onMounted, watch, type Ref } from 'vue'
 import { usePlayerStore } from '@/stores/player'
+import { resolveLocalStreamUrl } from '@/services/local/client'
 
 export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
   const player = usePlayerStore()
@@ -13,10 +14,16 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
       return
     }
 
-    // Keep this synchronous: a song selection is a user gesture, and browsers
-    // may reject playback if an async cache lookup happens before audio.play().
-    // Downloaded audio is served from the service worker's CacheFirst route.
-    audio.value.src = player.currentTrack.streamUrl
+    let src = player.currentTrack.streamUrl
+    if (src.startsWith('blob:') && player.currentTrack.id.startsWith('local:')) {
+      const freshUrl = await resolveLocalStreamUrl(player.currentTrack.id)
+      if (freshUrl) {
+        src = freshUrl
+        player.currentTrack.streamUrl = freshUrl
+      }
+    }
+
+    audio.value.src = src
     audio.value.currentTime = Math.min(player.currentTime, player.currentTrack.duration)
 
     if (player.isPlaying) {

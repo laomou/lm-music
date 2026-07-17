@@ -57,5 +57,6 @@ function addToQueue(track: Track) {
       </div>
     </div>
   </section>
+  <section v-else-if="library.loading" class="page empty-state"><p>{{ t('common.loading') }}</p></section>
   <section v-else class="page empty-state"><p>{{ t('playlist.notFound') }}</p><button type="button" class="primary-button" @click="router.push('/playlists')">{{ t('common.backToLibrary') }}</button></section>
 </template>

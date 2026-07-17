@@ -171,8 +171,7 @@ export const usePlayerStore = defineStore('player', {
     },
     clearUpcoming() {
       if (!this.currentTrack) return
-      this.queue = [this.currentTrack]
-      this.currentIndex = 0
+      this.queue = this.queue.slice(0, this.currentIndex + 1)
       this.persist()
     },
     addToQueue(track: Track) {
