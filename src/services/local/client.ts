@@ -91,7 +91,7 @@ async function scanDirectory(handle: FileSystemDirectoryHandle, path: string[] =
       artist: folderArtist || t('artist.unknown'),
       album: path.at(-2),
       duration: 0,
-      streamUrl: URL.createObjectURL(file),
+      streamUrl: '',
       lyrics,
       allowOfflineDownload: false,
     })

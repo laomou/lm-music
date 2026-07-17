@@ -5,6 +5,7 @@ import { resolveLocalStreamUrl } from '@/services/local/client'
 export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
   const player = usePlayerStore()
   const persistPlayback = () => player.persist()
+  let activeBlobUrl = ''
 
   async function loadSource() {
     if (!audio.value) return
@@ -15,11 +16,15 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
     }
 
     let src = player.currentTrack.streamUrl
-    if (src.startsWith('blob:') && player.currentTrack.id.startsWith('local:')) {
+    if (player.currentTrack.id.startsWith('local:')) {
+      if (activeBlobUrl) URL.revokeObjectURL(activeBlobUrl)
       const freshUrl = await resolveLocalStreamUrl(player.currentTrack.id)
       if (freshUrl) {
         src = freshUrl
+        activeBlobUrl = freshUrl
         player.currentTrack.streamUrl = freshUrl
+      } else {
+        activeBlobUrl = ''
       }
     }
 
