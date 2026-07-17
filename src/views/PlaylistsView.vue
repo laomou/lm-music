@@ -94,7 +94,7 @@ function clearRecent() {
       <span><small>{{ t('library.continue') }}</small><strong :title="player.currentTrack.title">{{ player.currentTrack.title }}</strong><em :title="player.currentTrack.artist">{{ player.currentTrack.artist }}</em></span><b><Play :size="15" fill="currentColor" /></b>
     </button>
 
-    <label class="library-search"><span>{{ t('library.searchPlaceholder') }}</span><input v-model="search" type="search" :placeholder="t('library.searchPlaceholder')" /></label>
+    <label v-if="library.playlists.length || player.recentTracks.length || player.favoriteTracks.length" class="library-search"><span>{{ t('library.searchPlaceholder') }}</span><input v-model="search" type="search" :placeholder="t('library.searchPlaceholder')" /></label>
 
     <div v-if="matchingTracks.length" class="section-heading"><h2>{{ t('library.matchingTracks') }}</h2></div>
     <div v-if="matchingTracks.length" class="recent-tracks">
