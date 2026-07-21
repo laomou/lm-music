@@ -37,6 +37,7 @@ jobs:
         env:
           # Repository Pages is served from /<repository-name>/, not from /.
           BASE_PATH: /${{ github.event.repository.name }}/
+          BUILD_REF: ${{ github.sha }}
         run: npm run build
 
       - name: Configure Pages

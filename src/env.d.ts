@@ -18,6 +18,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 declare const __APP_VERSION__: string
+declare const __BUILD_REF__: string
 
 interface FileSystemHandlePermissionDescriptor {
   mode?: 'read' | 'readwrite'
