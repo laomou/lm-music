@@ -35,6 +35,14 @@ function groupTracks(type: LibraryCollectionType, tracks: Track[]): LibraryColle
     .sort((left, right) => left.name.localeCompare(right.name))
 }
 
+async function playableOfflinePlaylists(cacheId: string, playlists: Playlist[]) {
+  const downloaded = await getDownloadedTracks(cacheId)
+  const downloadedTrackIds = new Set(downloaded.tracks.map((track) => track.trackId))
+  return playlists
+    .map((playlist) => ({ ...playlist, tracks: playlist.tracks.filter((track) => downloadedTrackIds.has(track.id)) }))
+    .filter((playlist) => playlist.tracks.length > 0)
+}
+
 export const useLibraryStore = defineStore('library', {
   state: () => ({ playlists: [] as Playlist[], searchResults: [] as Track[], loading: false, searchLoading: false, error: '', source: 'network' as 'network' | 'cache', fetchToken: 0, searchToken: 0 }),
   getters: {
@@ -72,7 +80,8 @@ export const useLibraryStore = defineStore('library', {
         const cached = await getLibrary(cacheId)
         if (!isCurrentFetch()) return
         if (cached?.playlists.length && (!auth.session || !navigator.onLine)) {
-          this.playlists = cached.playlists
+          this.playlists = await playableOfflinePlaylists(cacheId, cached.playlists)
+          if (!isCurrentFetch()) return
           this.source = 'cache'
         }
         if (!auth.session) {
@@ -81,11 +90,6 @@ export const useLibraryStore = defineStore('library', {
         }
         if (!navigator.onLine) {
           if (!this.playlists.length) throw new Error(t('error.noCachedPlaylists'))
-          const downloaded = await getDownloadedTracks(cacheId)
-          const trackIds = new Set(downloaded.tracks.map((track) => track.trackId))
-          this.playlists = this.playlists
-            .map((playlist) => ({ ...playlist, tracks: playlist.tracks.filter((track) => trackIds.has(track.id)) }))
-            .filter((playlist) => playlist.tracks.length > 0)
           return
         }
         const playlists = await getProviderForSession(auth.session).createClient(auth.session).getPlaylists()
@@ -95,8 +99,13 @@ export const useLibraryStore = defineStore('library', {
         await saveLibrary(cacheId, playlists)
       } catch (error) {
         if (!isCurrentFetch()) return
-        if (!this.playlists.length) this.error = error instanceof Error ? error.message : t('error.readLibraryFailed')
-        else this.source = 'cache'
+        if (cached?.playlists.length) {
+          this.playlists = await playableOfflinePlaylists(cacheId, cached.playlists)
+          if (!isCurrentFetch()) return
+          this.source = 'cache'
+        } else if (!this.playlists.length) {
+          this.error = error instanceof Error ? error.message : t('error.readLibraryFailed')
+        }
       } finally {
         if (isCurrentFetch()) this.loading = false
       }
