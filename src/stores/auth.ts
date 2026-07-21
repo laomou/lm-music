@@ -19,7 +19,14 @@ const loadSession = (): MusicSession | null => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    return decode(raw) ?? JSON.parse(raw) as MusicSession
+    const session = decode(raw) ?? JSON.parse(raw) as MusicSession
+    // Subsonic sessions saved before token authentication contain a password.
+    // They cannot be safely migrated, so require a one-time sign-in instead.
+    if (session.provider === 'subsonic' && (!session.token || !session.salt)) {
+      localStorage.removeItem(STORAGE_KEY)
+      return null
+    }
+    return session
   } catch {
     return null
   }

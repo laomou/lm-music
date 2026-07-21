@@ -26,15 +26,90 @@ type SubsonicLyrics = {
   syncedLyrics?: Array<{ start: number; value: string }>
 }
 
-function encodePassword(password: string) {
-  return `enc:${Array.from(new TextEncoder().encode(password)).map((byte) => byte.toString(16).padStart(2, '0')).join('')}`
+const MD5_SHIFTS = [
+  7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
+  5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20,
+  4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
+  6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21,
+]
+
+const MD5_CONSTANTS = Array.from({ length: 64 }, (_, index) => Math.floor(Math.abs(Math.sin(index + 1)) * 2 ** 32) >>> 0)
+
+function rotateLeft(value: number, shift: number) {
+  return ((value << shift) | (value >>> (32 - shift))) >>> 0
+}
+
+// Subsonic token authentication requires MD5(password + salt). The browser
+// Web Crypto API deliberately does not expose MD5, so keep the algorithm
+// contained here instead of ever putting the password in a request URL.
+function md5(value: string) {
+  const input = new TextEncoder().encode(value)
+  const paddedLength = (((input.length + 8) >>> 6) + 1) << 6
+  const bytes = new Uint8Array(paddedLength)
+  bytes.set(input)
+  bytes[input.length] = 0x80
+  const view = new DataView(bytes.buffer)
+  const bitLength = input.length * 8
+  view.setUint32(paddedLength - 8, bitLength >>> 0, true)
+  view.setUint32(paddedLength - 4, Math.floor(bitLength / 2 ** 32), true)
+
+  let a0 = 0x67452301
+  let b0 = 0xefcdab89
+  let c0 = 0x98badcfe
+  let d0 = 0x10325476
+  for (let offset = 0; offset < paddedLength; offset += 64) {
+    const words = Array.from({ length: 16 }, (_, index) => view.getUint32(offset + index * 4, true))
+    let a = a0
+    let b = b0
+    let c = c0
+    let d = d0
+    for (let index = 0; index < 64; index += 1) {
+      let f = 0
+      let g = 0
+      if (index < 16) {
+        f = (b & c) | (~b & d)
+        g = index
+      } else if (index < 32) {
+        f = (d & b) | (~d & c)
+        g = (5 * index + 1) % 16
+      } else if (index < 48) {
+        f = b ^ c ^ d
+        g = (3 * index + 5) % 16
+      } else {
+        f = c ^ (b | ~d)
+        g = (7 * index) % 16
+      }
+      const next = (b + rotateLeft((a + f + MD5_CONSTANTS[index]! + words[g]!) >>> 0, MD5_SHIFTS[index]!)) >>> 0
+      a = d
+      d = c
+      c = b
+      b = next
+    }
+    a0 = (a0 + a) >>> 0
+    b0 = (b0 + b) >>> 0
+    c0 = (c0 + c) >>> 0
+    d0 = (d0 + d) >>> 0
+  }
+  return [a0, b0, c0, d0].flatMap((word) => Array.from({ length: 4 }, (_, index) => ((word >>> (index * 8)) & 0xff).toString(16).padStart(2, '0'))).join('')
+}
+
+function createSalt() {
+  const bytes = crypto.getRandomValues(new Uint8Array(16))
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 
 export class NavidromeClient {
   constructor(private readonly session: SubsonicSession) {}
 
   static async login(serverUrl: string, username: string, password: string): Promise<SubsonicSession> {
-    const session: SubsonicSession = { provider: 'subsonic', serverUrl: serverUrl.replace(/\/$/, ''), username, password }
+    const salt = createSalt()
+    const session: SubsonicSession = {
+      provider: 'subsonic',
+      serverUrl: serverUrl.replace(/\/$/, ''),
+      username,
+      salt,
+      token: md5(`${password}${salt}`),
+    }
     const client = new NavidromeClient(session)
     await client.request('ping')
     return session
@@ -43,7 +118,8 @@ export class NavidromeClient {
   private authParams() {
     return new URLSearchParams({
       u: this.session.username,
-      p: encodePassword(this.session.password),
+      t: this.session.token,
+      s: this.session.salt,
       v: '1.16.1',
       c: 'lm-music',
       f: 'json',
