@@ -40,6 +40,6 @@ function disconnect() {
     <p v-if="app.serviceWorkerError" class="form-error" role="alert">{{ app.serviceWorkerError }}</p>
     <button type="button" v-if="auth.isConnected" class="danger-button" @click="disconnect">{{ t('settings.disconnect') }}</button>
     <button type="button" v-else class="primary-button" @click="router.push('/connect')">{{ t('settings.connect') }}</button>
-    <footer class="app-version" :aria-label="t('settings.about')"><span>LM Music · {{ t('settings.version', { version: appVersion }) }}</span><span>{{ t('settings.aboutDescription') }}</span></footer>
+    <footer class="app-version" :aria-label="t('settings.version', { version: appVersion })">LM Music · {{ t('settings.version', { version: appVersion }) }}</footer>
   </section>
 </template>
