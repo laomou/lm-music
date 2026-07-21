@@ -11,8 +11,13 @@ type ProviderCredentials = {
   password?: string
 }
 
+export type PlaylistLoadOptions = {
+  signal?: AbortSignal
+  onProgress?: (scannedFiles: number) => void
+}
+
 type MusicProviderClient = {
-  getPlaylists(): Promise<Playlist[]>
+  getPlaylists(options?: PlaylistLoadOptions): Promise<Playlist[]>
   getLyrics(trackId: string): Promise<LyricLine[]>
   search?(query: string): Promise<Track[]>
 }

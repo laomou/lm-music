@@ -136,7 +136,8 @@ function clearRecent() {
       </button>
     </div>
 
-    <div class="section-heading"><h2>{{ viewMode === 'albums' ? t('library.albumTab') : viewMode === 'artists' ? t('library.artistTab') : auth.isConnected ? t('library.playlists', { provider: providerLabel }) : t('library.offlinePlaylists') }}</h2><span v-if="library.loading">{{ t('common.loading') }}</span></div>
+    <div class="section-heading"><h2>{{ viewMode === 'albums' ? t('library.albumTab') : viewMode === 'artists' ? t('library.artistTab') : auth.isConnected ? t('library.playlists', { provider: providerLabel }) : t('library.offlinePlaylists') }}</h2><span v-if="library.loading && auth.session?.provider !== 'local'">{{ t('common.loading') }}</span></div>
+    <div v-if="library.loading && auth.session?.provider === 'local'" class="local-scan-status" role="status"><span>{{ t('library.scanningLocal', { count: library.localScanCount }) }}</span><button type="button" class="text-button" @click="library.cancelLocalScan">{{ t('common.cancel') }}</button></div>
     <p v-if="library.error" class="form-error" role="alert">{{ library.error }}</p>
     <div v-if="viewMode === 'playlists' && playlists.length" class="playlist-grid">
       <button type="button" v-for="playlist in playlists" :key="playlist.id" class="playlist-card" :aria-label="t('library.openPlaylist', { name: playlist.name })" @click="router.push(`/playlist/${playlist.id}`)">

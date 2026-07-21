@@ -1,4 +1,5 @@
 import { t } from '@/i18n'
+import type { PlaylistLoadOptions } from '@/services/providers'
 import type { LocalFolderSession, LyricLine, Playlist, Track } from '@/types/music'
 import { decodeBase64Url, encodeBase64Url } from '@/utils/base64Url'
 import { parseLrc } from '@/utils/parseLrc'
@@ -106,14 +107,19 @@ async function readLyrics(handle?: FileSystemFileHandle) {
   }
 }
 
-async function scanDirectory(handle: FileSystemDirectoryHandle, path: string[] = []): Promise<Track[]> {
+function throwIfAborted(signal?: AbortSignal) {
+  if (signal?.aborted) throw new DOMException('Local folder scan cancelled.', 'AbortError')
+}
+
+async function scanDirectory(handle: FileSystemDirectoryHandle, path: string[] = [], options: PlaylistLoadOptions = {}): Promise<Track[]> {
   const tracks: Track[] = []
   const audioFiles: FileSystemFileHandle[] = []
   const lyricsFiles = new Map<string, FileSystemFileHandle>()
 
   for await (const [name, entry] of handle.entries()) {
+    throwIfAborted(options.signal)
     if (entry.kind === 'directory') {
-      tracks.push(...await scanDirectory(entry, [...path, name]))
+      tracks.push(...await scanDirectory(entry, [...path, name], options))
       continue
     }
     if (name.toLowerCase().endsWith('.lrc')) {
@@ -124,7 +130,9 @@ async function scanDirectory(handle: FileSystemDirectoryHandle, path: string[] =
   }
 
   for (const entry of audioFiles) {
+    throwIfAborted(options.signal)
     const file = await entry.getFile()
+    options.onProgress?.(1)
     const title = cleanTitle(file.name)
     const folderArtist = path.at(-1)
     const lyrics = await readLyrics(lyricsFiles.get(title.toLowerCase()))
@@ -165,10 +173,17 @@ export class LocalFolderClient {
     return { provider: 'local', serverUrl: 'local://folder', username: handle.name }
   }
 
-  async getPlaylists(): Promise<Playlist[]> {
+  async getPlaylists(options: PlaylistLoadOptions = {}): Promise<Playlist[]> {
     const handle = await getDirectoryHandle()
     if (!handle || !await ensureReadPermission(handle)) throw new Error(t('error.localFolderPermission'))
-    const tracks = await scanDirectory(handle)
+    const scannedFiles = { value: 0 }
+    const tracks = await scanDirectory(handle, [], {
+      ...options,
+      onProgress: (count) => {
+        scannedFiles.value += count
+        options.onProgress?.(scannedFiles.value)
+      },
+    })
     return [{ id: 'local-folder', name: handle.name, coverUrl: tracks[0]?.coverUrl, tracks }]
   }
 
