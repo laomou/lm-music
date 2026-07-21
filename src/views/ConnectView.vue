@@ -48,7 +48,7 @@ async function connect() {
     <div class="connect-toolbar"><button type="button" v-if="auth.isConnected" class="back-button connect-back" @click="router.push('/playlists')"><ArrowLeft :size="18" /> {{ t('connect.back') }}</button><label class="locale-select"><span>{{ t('common.language') }}</span><select v-model="language"><option value="zh-CN">{{ t('common.chinese') }}</option><option value="en">{{ t('common.english') }}</option></select></label></div>
     <img class="brand-mark" :src="appIconSrc" alt="LM Music" />
     <p class="eyebrow">LM MUSIC</p>
-    <h1 v-html="t('connect.title')" />
+    <h1>{{ t('connect.title') }}</h1>
     <p class="muted">{{ t('connect.description') }}</p>
     <form class="connect-form" @submit.prevent="connect">
       <fieldset class="provider-picker"><legend>{{ t('connect.source') }}</legend><label v-for="source in musicProviders" :key="source.id" :class="{ selected: provider === source.id, 'audius-option': source.id === 'audius' }"><input v-model="provider" type="radio" :value="source.id" /><span><strong>{{ source.label }}</strong><small>{{ getProviderSubtitle(source) }}</small></span></label></fieldset>
