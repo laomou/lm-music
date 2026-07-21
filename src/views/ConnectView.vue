@@ -13,6 +13,7 @@ const auth = useAuthStore()
 const serverUrl = ref('')
 const username = ref('')
 const password = ref('')
+const rememberSession = ref(true)
 const loading = ref(false)
 const error = ref('')
 const provider = ref<MusicProviderType>('jellyfin')
@@ -33,7 +34,7 @@ async function connect() {
       throw new Error(t('connect.insecureServer'))
     }
     const session = await source.connect({ serverUrl: serverUrl.value, username: username.value, password: password.value })
-    auth.saveSession(session)
+    auth.saveSession(session, rememberSession.value)
     await router.push('/playlists')
   } catch (reason) {
     error.value = reason instanceof Error ? reason.message : t('common.connectFailed')
@@ -52,7 +53,7 @@ async function connect() {
     <p class="muted">{{ t('connect.description') }}</p>
     <form class="connect-form" @submit.prevent="connect">
       <fieldset class="provider-picker"><legend>{{ t('connect.source') }}</legend><label v-for="source in musicProviders" :key="source.id" :class="{ selected: provider === source.id, 'audius-option': source.id === 'audius' }"><input v-model="provider" type="radio" :value="source.id" /><span><strong>{{ source.label }}</strong><small>{{ getProviderSubtitle(source) }}</small></span></label></fieldset>
-      <template v-if="getMusicProvider(provider).requiresCredentials"><label>{{ t('connect.serverUrl') }}<input v-model.trim="serverUrl" required type="url" :placeholder="provider === 'jellyfin' ? 'https://jellyfin.example.com' : 'https://music.example.com'" /></label><label>{{ t('connect.username') }}<input v-model.trim="username" required autocomplete="username" :placeholder="t('connect.username')" /></label><label>{{ t('connect.password') }}<input v-model="password" required type="password" autocomplete="current-password" :placeholder="t('connect.password')" /></label></template>
+      <template v-if="getMusicProvider(provider).requiresCredentials"><label>{{ t('connect.serverUrl') }}<input v-model.trim="serverUrl" required type="url" :placeholder="provider === 'jellyfin' ? 'https://jellyfin.example.com' : 'https://music.example.com'" /></label><label>{{ t('connect.username') }}<input v-model.trim="username" required autocomplete="username" :placeholder="t('connect.username')" /></label><label>{{ t('connect.password') }}<input v-model="password" required type="password" autocomplete="current-password" :placeholder="t('connect.password')" /></label><label class="remember-session"><input v-model="rememberSession" type="checkbox" /><span>{{ t('connect.rememberSession') }}</span></label><p class="credential-notice">{{ t('connect.credentialNotice') }}</p></template>
       <p v-else class="provider-description">{{ providerDescription }}</p>
       <p v-if="insecureServerUrl" class="form-error" role="alert">{{ t('connect.insecureServer') }}</p>
       <p v-else-if="error" class="form-error" role="alert">{{ error }}</p>

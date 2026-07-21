@@ -29,9 +29,10 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({ session: loadSession() as MusicSession | null }),
   getters: { isConnected: (state) => Boolean(state.session) },
   actions: {
-    saveSession(session: MusicSession) {
+    saveSession(session: MusicSession, remember = true) {
       this.session = session
-      localStorage.setItem(STORAGE_KEY, encode(session))
+      if (remember) localStorage.setItem(STORAGE_KEY, encode(session))
+      else localStorage.removeItem(STORAGE_KEY)
     },
     logout() {
       this.session = null
