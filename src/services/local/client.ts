@@ -8,6 +8,61 @@ const STORE = 'handles'
 const HANDLE_KEY = 'music-folder'
 const AUDIO_EXTENSIONS = new Set(['mp3', 'flac', 'm4a', 'aac', 'ogg', 'opus', 'wav', 'webm'])
 
+type LocalTrackReference = {
+  path: string[]
+  lastModified: number
+  size: number
+}
+
+function encodeBase64Url(value: string) {
+  const bytes = new TextEncoder().encode(value)
+  let binary = ''
+  for (const byte of bytes) binary += String.fromCharCode(byte)
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
+function decodeBase64Url(value: string) {
+  const base64 = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=')
+  const binary = atob(base64)
+  return new TextDecoder().decode(Uint8Array.from(binary, (character) => character.charCodeAt(0)))
+}
+
+export function encodeLocalTrackId(reference: LocalTrackReference) {
+  return `local:${encodeBase64Url(JSON.stringify(reference))}`
+}
+
+function decodeLegacyLocalTrackId(trackId: string): LocalTrackReference | null {
+  const parts = trackId.replace(/^local:/, '').split(':')
+  const size = Number(parts.pop())
+  const lastModified = Number(parts.pop())
+  const path = parts.join(':').split('/')
+  if (!path.length || path.some((segment) => !segment) || !Number.isFinite(lastModified) || !Number.isFinite(size)) return null
+  return { path, lastModified, size }
+}
+
+export function decodeLocalTrackId(trackId: string): LocalTrackReference | null {
+  if (!trackId.startsWith('local:')) return null
+  const encodedReference = trackId.slice('local:'.length)
+  try {
+    const reference = JSON.parse(decodeBase64Url(encodedReference)) as Partial<LocalTrackReference>
+    if (
+      !Array.isArray(reference.path)
+      || reference.path.length === 0
+      || reference.path.some((segment) => typeof segment !== 'string' || !segment)
+      || !Number.isFinite(reference.lastModified)
+      || !Number.isFinite(reference.size)
+    ) return null
+    return {
+      path: reference.path,
+      lastModified: reference.lastModified,
+      size: reference.size,
+    }
+  } catch {
+    // Support previously persisted ids while new scans use the unambiguous format.
+    return decodeLegacyLocalTrackId(trackId)
+  }
+}
+
 function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
@@ -86,7 +141,7 @@ async function scanDirectory(handle: FileSystemDirectoryHandle, path: string[] =
     const folderArtist = path.at(-1)
     const lyrics = await readLyrics(lyricsFiles.get(title.toLowerCase()))
     tracks.push({
-      id: `local:${[...path, file.name].join('/')}:${file.lastModified}:${file.size}`,
+      id: encodeLocalTrackId({ path: [...path, file.name], lastModified: file.lastModified, size: file.size }),
       title,
       artist: folderArtist || t('artist.unknown'),
       album: path.at(-2),
@@ -100,17 +155,14 @@ async function scanDirectory(handle: FileSystemDirectoryHandle, path: string[] =
 }
 
 export async function resolveLocalStreamUrl(trackId: string): Promise<string | null> {
-  const parts = trackId.replace(/^local:/, '').split(':')
-  parts.pop() // size
-  parts.pop() // lastModified
-  const relativePath = parts.join(':')
-  const segments = relativePath.split('/')
+  const reference = decodeLocalTrackId(trackId)
+  if (!reference) return null
   const handle = await getDirectoryHandle()
   if (!handle || !await ensureReadPermission(handle)) return null
   try {
     let dir = handle
-    for (const segment of segments.slice(0, -1)) dir = await dir.getDirectoryHandle(segment)
-    const fileHandle = await dir.getFileHandle(segments.at(-1)!)
+    for (const segment of reference.path.slice(0, -1)) dir = await dir.getDirectoryHandle(segment)
+    const fileHandle = await dir.getFileHandle(reference.path.at(-1)!)
     return URL.createObjectURL(await fileHandle.getFile())
   } catch {
     return null
