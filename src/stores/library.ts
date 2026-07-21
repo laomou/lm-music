@@ -80,8 +80,9 @@ export const useLibraryStore = defineStore('library', {
       const auth = useAuthStore()
       const cacheId = sessionCacheId(auth.session)
       const isCurrentFetch = () => token === this.fetchToken && cacheId === sessionCacheId(useAuthStore().session)
+      let cached: Awaited<ReturnType<typeof getLibrary>>
       try {
-        const cached = await getLibrary(cacheId)
+        cached = await getLibrary(cacheId)
         if (!isCurrentFetch()) return
         if (cached?.playlists.length && (!auth.session || !navigator.onLine)) {
           this.playlists = await playableOfflinePlaylists(cacheId, cached.playlists)
