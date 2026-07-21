@@ -49,7 +49,8 @@ export type SubsonicSession = {
   provider: 'subsonic'
   serverUrl: string
   username: string
-  password: string
+  token: string
+  salt: string
 }
 
 export type AudiusSession = {
