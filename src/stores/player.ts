@@ -115,7 +115,7 @@ export const usePlayerStore = defineStore('player', {
     },
     play(track: Track, queue: Track[], startTime = 0) {
       this.error = ''
-      this.queue = queue
+      this.queue = [...queue]
       this.currentIndex = Math.max(queue.findIndex((item) => item.id === track.id), 0)
       this.currentTrack = queue[this.currentIndex] ?? track
       this.currentTime = startTime
