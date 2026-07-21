@@ -44,7 +44,7 @@ async function playableOfflinePlaylists(cacheId: string, playlists: Playlist[]) 
 }
 
 export const useLibraryStore = defineStore('library', {
-  state: () => ({ playlists: [] as Playlist[], searchResults: [] as Track[], loading: false, searchLoading: false, error: '', source: 'network' as 'network' | 'cache', fetchToken: 0, searchToken: 0 }),
+  state: () => ({ playlists: [] as Playlist[], searchResults: [] as Track[], loading: false, searchLoading: false, localScanCount: 0, localScanController: null as AbortController | null, error: '', source: 'network' as 'network' | 'cache', fetchToken: 0, searchToken: 0 }),
   getters: {
     offlinePlaylists: (state) => state.playlists.filter((playlist) => playlist.tracks.length > 0),
     allTracks: (state) => uniqueTracks(state.playlists),
@@ -66,10 +66,14 @@ export const useLibraryStore = defineStore('library', {
       this.searchResults = []
       this.loading = false
       this.searchLoading = false
+      this.localScanController?.abort()
+      this.localScanController = null
+      this.localScanCount = 0
       this.error = ''
       this.source = 'network'
     },
     async fetchPlaylists() {
+      this.localScanController?.abort()
       const token = ++this.fetchToken
       this.loading = true
       this.error = ''
@@ -92,13 +96,21 @@ export const useLibraryStore = defineStore('library', {
           if (!this.playlists.length) throw new Error(t('error.noCachedPlaylists'))
           return
         }
-        const playlists = await getProviderForSession(auth.session).createClient(auth.session).getPlaylists()
+        const isLocal = auth.session.provider === 'local'
+        const controller = isLocal ? new AbortController() : null
+        this.localScanController = controller
+        this.localScanCount = 0
+        const playlists = await getProviderForSession(auth.session).createClient(auth.session).getPlaylists({
+          signal: controller?.signal,
+          onProgress: (scannedFiles) => { if (isCurrentFetch()) this.localScanCount = scannedFiles },
+        })
         if (!isCurrentFetch()) return
         this.playlists = playlists
         this.source = 'network'
         await saveLibrary(cacheId, playlists)
       } catch (error) {
         if (!isCurrentFetch()) return
+        if (error instanceof DOMException && error.name === 'AbortError') return
         if (cached?.playlists.length) {
           this.playlists = await playableOfflinePlaylists(cacheId, cached.playlists)
           if (!isCurrentFetch()) return
@@ -107,8 +119,14 @@ export const useLibraryStore = defineStore('library', {
           this.error = error instanceof Error ? error.message : t('error.readLibraryFailed')
         }
       } finally {
-        if (isCurrentFetch()) this.loading = false
+        if (isCurrentFetch()) {
+          this.loading = false
+          this.localScanController = null
+        }
       }
+    },
+    cancelLocalScan() {
+      this.localScanController?.abort()
     },
     async loadLyrics(trackId: string) {
       const auth = useAuthStore()
