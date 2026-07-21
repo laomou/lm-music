@@ -6,37 +6,59 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
   const player = usePlayerStore()
   const persistPlayback = () => player.persist()
   let activeBlobUrl = ''
+  let sourceLoadId = 0
+
+  function releaseActiveBlobUrl() {
+    if (!activeBlobUrl) return
+    URL.revokeObjectURL(activeBlobUrl)
+    activeBlobUrl = ''
+  }
 
   async function loadSource() {
-    if (!audio.value) return
-    if (!player.currentTrack) {
-      audio.value.removeAttribute('src')
-      audio.value.load()
+    const audioElement = audio.value
+    const track = player.currentTrack
+    const loadId = ++sourceLoadId
+
+    if (!audioElement) return
+    if (!track) {
+      releaseActiveBlobUrl()
+      audioElement.removeAttribute('src')
+      audioElement.load()
       return
     }
 
-    let src = player.currentTrack.streamUrl
-    if (player.currentTrack.id.startsWith('local:')) {
-      if (activeBlobUrl) URL.revokeObjectURL(activeBlobUrl)
-      const freshUrl = await resolveLocalStreamUrl(player.currentTrack.id)
-      if (freshUrl) {
-        src = freshUrl
-        activeBlobUrl = freshUrl
-        player.currentTrack.streamUrl = freshUrl
-      } else {
-        activeBlobUrl = ''
+    let src = track.streamUrl
+    let resolvedBlobUrl = ''
+    if (track.id.startsWith('local:')) {
+      try {
+        resolvedBlobUrl = await resolveLocalStreamUrl(track.id) ?? ''
+      } catch {
+        resolvedBlobUrl = ''
       }
+      if (loadId !== sourceLoadId) {
+        if (resolvedBlobUrl) URL.revokeObjectURL(resolvedBlobUrl)
+        return
+      }
+      src = resolvedBlobUrl
     }
 
-    audio.value.src = src
-    audio.value.currentTime = Math.min(player.currentTime, player.currentTrack.duration)
+    releaseActiveBlobUrl()
+    activeBlobUrl = resolvedBlobUrl
+    audioElement.src = src
+    audioElement.currentTime = Math.min(player.currentTime, track.duration)
 
     if (player.isPlaying) {
-      try { await audio.value.play() } catch { player.togglePlayback() }
+      try { await audioElement.play() } catch { player.togglePlayback() }
     }
   }
 
-  watch(() => player.currentTrack?.id, loadSource, { immediate: true })
+  watch(() => {
+    const track = player.currentTrack
+    if (!track) return ''
+    // Local blob URLs are short-lived and must always be re-created from the
+    // saved directory handle. Remote tracks reload when their stream URL changes.
+    return track.id.startsWith('local:') ? `local:${track.id}` : `${track.id}:${track.streamUrl}`
+  }, () => { void loadSource() }, { immediate: true })
   watch(() => player.isPlaying, async (playing) => {
     if (!audio.value || !player.currentTrack) return
     try {
@@ -57,6 +79,8 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
     document.addEventListener('visibilitychange', handleVisibilityChange)
   })
   onBeforeUnmount(() => {
+    sourceLoadId += 1
+    releaseActiveBlobUrl()
     window.removeEventListener('beforeunload', persistPlayback)
     document.removeEventListener('visibilitychange', handleVisibilityChange)
     persistPlayback()
