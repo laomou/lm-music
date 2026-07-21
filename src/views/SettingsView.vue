@@ -12,6 +12,7 @@ const router = useRouter()
 const auth = useAuthStore()
 const app = useAppStore()
 const appVersion = __APP_VERSION__
+const appBuildRef = __BUILD_REF__
 const provider = computed(() => auth.session ? getProviderForSession(auth.session) : null)
 const sourceLabel = computed(() => {
   if (!provider.value) return t('settings.source')
@@ -40,6 +41,6 @@ function disconnect() {
     <p v-if="app.serviceWorkerError" class="form-error" role="alert">{{ app.serviceWorkerError }}</p>
     <button type="button" v-if="auth.isConnected" class="danger-button" @click="disconnect">{{ t('settings.disconnect') }}</button>
     <button type="button" v-else class="primary-button" @click="router.push('/connect')">{{ t('settings.connect') }}</button>
-    <footer class="app-version" :aria-label="t('settings.version', { version: appVersion })">LM Music · {{ t('settings.version', { version: appVersion }) }}</footer>
+    <footer class="app-version" :aria-label="t('settings.version', { version: appVersion })">LM Music · {{ t('settings.version', { version: appVersion }) }} ({{ appBuildRef }})</footer>
   </section>
 </template>

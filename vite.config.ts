@@ -2,13 +2,18 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
+import pkg from './package.json' with { type: 'json' }
 
 const base = process.env.BASE_PATH ?? './'
 const navigateFallback = base === './' ? 'index.html' : `${base}index.html`
+const buildRef = process.env.BUILD_REF ?? process.env.GITHUB_SHA?.slice(0, 8) ?? 'dev'
 
 export default defineConfig({
   base,
-  define: { __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? '0.1.0') },
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __BUILD_REF__: JSON.stringify(buildRef),
+  },
   plugins: [
     vue(),
     VitePWA({
