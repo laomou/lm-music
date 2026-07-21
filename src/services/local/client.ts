@@ -43,8 +43,8 @@ export function decodeLocalTrackId(trackId: string): LocalTrackReference | null 
     ) return null
     return {
       path: reference.path,
-      lastModified: reference.lastModified,
-      size: reference.size,
+      lastModified: reference.lastModified!,
+      size: reference.size!,
     }
   } catch {
     // Support previously persisted ids while new scans use the unambiguous format.
