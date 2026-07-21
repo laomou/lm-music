@@ -57,7 +57,7 @@ export function useAudioPlayer(audio: Ref<HTMLAudioElement | null>) {
     if (!track) return ''
     // Local blob URLs are short-lived and must always be re-created from the
     // saved directory handle. Remote tracks reload when their stream URL changes.
-    return track.id.startsWith('local:') ? `local:${track.id}` : `${track.id}:${track.streamUrl}`
+    return track.id.startsWith('local:') ? track.id : `${track.id}:${track.streamUrl}`
   }, () => { void loadSource() }, { immediate: true })
   watch(() => player.isPlaying, async (playing) => {
     if (!audio.value || !player.currentTrack) return
