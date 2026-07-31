@@ -1,6 +1,6 @@
 # LM Music
 
-[English](./README.md)
+[English](README.md)
 
 LM Music 是一个浏览器音乐播放器，支持 Jellyfin、Navidrome / OpenSubsonic、Audius，以及本地音乐文件夹。
 
