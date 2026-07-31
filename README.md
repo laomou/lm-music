@@ -1,6 +1,6 @@
 # LM Music
 
-[中文说明](./README_zh.md)
+[中文](README_zh.md)
 
 LM Music is a browser music player for Jellyfin, Navidrome / OpenSubsonic, Audius, and local music folders.
 
