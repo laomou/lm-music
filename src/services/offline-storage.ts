@@ -26,17 +26,27 @@ type DownloadSummary = {
   totalBytes: number
 }
 
+// One shared connection per database for the lifetime of the page. Opening a
+// new connection per get/put/delete accumulates hundreds of open connections
+// during long download sessions.
+let databasePromise: Promise<IDBDatabase> | null = null
 function openDatabase(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION)
-    request.onerror = () => reject(request.error)
-    request.onupgradeneeded = () => {
-      const database = request.result
-      if (!database.objectStoreNames.contains(LIBRARY_STORE)) database.createObjectStore(LIBRARY_STORE, { keyPath: 'id' })
-      if (!database.objectStoreNames.contains(DOWNLOAD_STORE)) database.createObjectStore(DOWNLOAD_STORE, { keyPath: 'id' })
-    }
-    request.onsuccess = () => resolve(request.result)
-  })
+  if (!databasePromise) {
+    databasePromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION)
+      request.onerror = () => {
+        databasePromise = null
+        reject(request.error)
+      }
+      request.onupgradeneeded = () => {
+        const database = request.result
+        if (!database.objectStoreNames.contains(LIBRARY_STORE)) database.createObjectStore(LIBRARY_STORE, { keyPath: 'id' })
+        if (!database.objectStoreNames.contains(DOWNLOAD_STORE)) database.createObjectStore(DOWNLOAD_STORE, { keyPath: 'id' })
+      }
+      request.onsuccess = () => resolve(request.result)
+    })
+  }
+  return databasePromise
 }
 
 async function getRecord<T>(storeName: string, key: string): Promise<T | undefined> {
