@@ -82,16 +82,27 @@ export class JellyfinClient {
   }
 
   async getAllTracks(): Promise<Track[]> {
-    const params = new URLSearchParams({
-      UserId: this.session.userId,
-      IncludeItemTypes: 'Audio',
-      Recursive: 'true',
-      SortBy: 'SortName',
-      Fields: 'PrimaryImageAspectRatio,AlbumPrimaryImageTag',
-      Limit: '500',
-    })
-    const result = await this.request<JellyfinItemsResponse>(`/Users/${this.session.userId}/Items?${params}`)
-    return result.Items.filter((item) => item.RunTimeTicks !== undefined).map((item) => this.toTrack(item))
+    // Jellyfin caps a single query, so page through the whole library to
+    // keep the "all songs" fallback complete for large collections.
+    const pageLimit = 500
+    let startIndex = 0
+    const items: JellyfinItem[] = []
+    for (;;) {
+      const params = new URLSearchParams({
+        UserId: this.session.userId,
+        IncludeItemTypes: 'Audio',
+        Recursive: 'true',
+        SortBy: 'SortName',
+        Fields: 'PrimaryImageAspectRatio,AlbumPrimaryImageTag',
+        Limit: String(pageLimit),
+        StartIndex: String(startIndex),
+      })
+      const result = await this.request<JellyfinItemsResponse>(`/Users/${this.session.userId}/Items?${params}`)
+      items.push(...result.Items)
+      if (result.Items.length < pageLimit) break
+      startIndex += pageLimit
+    }
+    return items.filter((item) => item.RunTimeTicks !== undefined).map((item) => this.toTrack(item))
   }
 
   async search(query: string): Promise<Track[]> {
