@@ -27,7 +27,7 @@ function play(index: number) {
 }
 
 function addToQueue(track: Track) {
-  player.addToQueue(track)
+  if (!player.addToQueue(track)) return
   queuedTrackId.value = track.id
   window.setTimeout(() => { if (queuedTrackId.value === track.id) queuedTrackId.value = '' }, 1600)
 }

@@ -41,6 +41,42 @@ describe('player store', () => {
     expect(player.currentIndex).toBe(0)
   })
 
+  it('dedupes tracks when playing a queue that contains duplicates', () => {
+    const player = usePlayerStore()
+    const queue = [track('one'), track('two'), track('one')]
+
+    player.play(queue[0]!, queue)
+
+    expect(player.queue.map((item) => item.id)).toEqual(['one', 'two'])
+    expect(player.currentIndex).toBe(0)
+    expect(player.currentTrack?.id).toBe('one')
+  })
+
+  it('does not add a track to the queue when it is already queued', () => {
+    const player = usePlayerStore()
+    player.play(track('one'), [track('one'), track('two'), track('three')])
+
+    expect(player.addToQueue(track('two'))).toBe(false)
+    expect(player.queue.map((item) => item.id)).toEqual(['one', 'two', 'three'])
+
+    expect(player.addToQueue(track('four'))).toBe(true)
+    expect(player.queue.map((item) => item.id)).toEqual(['one', 'two', 'three', 'four'])
+  })
+
+  it('dedupes a persisted queue restored from a previous version', () => {
+    const persisted = track('saved')
+    localStorage.setItem('lm-music-player', JSON.stringify({
+      currentTrack: persisted,
+      queue: [persisted, { ...persisted }, track('other')],
+      currentIndex: 0,
+    }))
+    const player = usePlayerStore()
+
+    player.restorePlayback()
+
+    expect(player.queue.map((item) => item.id)).toEqual(['saved', 'other'])
+  })
+
   it('does not autoplay restored playback', () => {
     const persisted = track('saved')
     localStorage.setItem('lm-music-player', JSON.stringify({

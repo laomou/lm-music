@@ -31,6 +31,20 @@ const restore = (): PersistedPlayer => {
   }
 }
 
+// Queue entries are addressed by track id everywhere (v-for keys,
+// reorder, removal, next/previous lookups), so the queue must never
+// contain the same track twice.
+function uniqueQueue(tracks: Track[]): Track[] {
+  const seen = new Set<string>()
+  const unique: Track[] = []
+  for (const track of tracks) {
+    if (seen.has(track.id)) continue
+    seen.add(track.id)
+    unique.push(track)
+  }
+  return unique
+}
+
 export const usePlayerStore = defineStore('player', {
   state: () => {
     const saved = restore()
@@ -86,7 +100,7 @@ export const usePlayerStore = defineStore('player', {
       const saved = restore()
       if (!saved.currentTrack) return
       this.currentTrack = saved.currentTrack
-      this.queue = saved.queue?.length ? saved.queue : [saved.currentTrack]
+      this.queue = uniqueQueue(saved.queue?.length ? saved.queue : [saved.currentTrack])
       const queueIndex = saved.currentIndex ?? this.queue.findIndex((track) => track.id === saved.currentTrack?.id)
       this.currentIndex = Math.max(0, Math.min(queueIndex, this.queue.length - 1))
       this.currentTime = saved.currentTime ?? 0
@@ -115,9 +129,10 @@ export const usePlayerStore = defineStore('player', {
     },
     play(track: Track, queue: Track[], startTime = 0) {
       this.error = ''
-      this.queue = [...queue]
-      this.currentIndex = Math.max(queue.findIndex((item) => item.id === track.id), 0)
-      this.currentTrack = queue[this.currentIndex] ?? track
+      const nextQueue = uniqueQueue(queue)
+      this.queue = nextQueue.length ? nextQueue : [track]
+      this.currentIndex = Math.max(this.queue.findIndex((item) => item.id === track.id), 0)
+      this.currentTrack = this.queue[this.currentIndex] ?? track
       this.currentTime = startTime
       this.duration = track.duration
       this.isPlaying = true
@@ -178,14 +193,15 @@ export const usePlayerStore = defineStore('player', {
       this.queue = this.queue.slice(0, this.currentIndex + 1)
       this.persist()
     },
-    addToQueue(track: Track) {
+    addToQueue(track: Track): boolean {
       if (!this.currentTrack) {
         this.play(track, [track])
-        return
+        return true
       }
-      if (this.queue.at(-1)?.id === track.id) return
+      if (this.queue.some((item) => item.id === track.id)) return false
       this.queue = [...this.queue, track]
       this.persist()
+      return true
     },
     next() {
       if (!this.queue.length || !this.currentTrack) return
