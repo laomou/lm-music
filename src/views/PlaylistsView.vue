@@ -70,7 +70,9 @@ function playRecent(trackId: string) {
   if (!saved) return
   const libraryTrack = library.allTracks.find((item) => item.id === trackId)
   const track = libraryTrack ?? saved
-  if (!track.streamUrl) return
+  // Local tracks resolve their stream from the saved directory handle,
+  // so an empty streamUrl must not block playback from recents/favorites.
+  if (!track.streamUrl && !track.id.startsWith('local:')) return
   const playlist = library.playlists.find((item) => item.tracks.some((item) => item.id === track.id))
   player.play(track, playlist?.tracks ?? [track])
   router.push('/now-playing')
