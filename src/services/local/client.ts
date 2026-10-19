@@ -52,16 +52,25 @@ export function decodeLocalTrackId(trackId: string): LocalTrackReference | null 
   }
 }
 
+// One shared connection for the lifetime of the page; the handle store is
+// touched on every local playback, so per-call connections would leak.
+let databasePromise: Promise<IDBDatabase> | null = null
 function openDatabase(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION)
-    request.onerror = () => reject(request.error)
-    request.onupgradeneeded = () => {
-      const database = request.result
-      if (!database.objectStoreNames.contains(STORE)) database.createObjectStore(STORE)
-    }
-    request.onsuccess = () => resolve(request.result)
-  })
+  if (!databasePromise) {
+    databasePromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION)
+      request.onerror = () => {
+        databasePromise = null
+        reject(request.error)
+      }
+      request.onupgradeneeded = () => {
+        const database = request.result
+        if (!database.objectStoreNames.contains(STORE)) database.createObjectStore(STORE)
+      }
+      request.onsuccess = () => resolve(request.result)
+    })
+  }
+  return databasePromise
 }
 
 async function saveDirectoryHandle(handle: FileSystemDirectoryHandle) {
