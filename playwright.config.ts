@@ -2,6 +2,9 @@ import { defineConfig, devices } from 'playwright/test'
 
 export default defineConfig({
   testDir: './tests',
+  // Only the Playwright e2e specs live in tests/; the vitest unit specs in
+  // tests/unit are run by `npm run test:unit`, not by Playwright.
+  testMatch: 'smoke.spec.ts',
   timeout: 30_000,
   expect: { timeout: 5_000 },
   use: {
