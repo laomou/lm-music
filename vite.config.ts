@@ -60,12 +60,22 @@ export default defineConfig({
             options: { cacheName: 'lm-music-lyrics', networkTimeoutSeconds: 4, expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 } },
           },
           {
-            // Explicit downloads are written to this cache. This route makes
-            // the same Jellyfin and OpenSubsonic/Navidrome stream URLs
-            // available while the device is offline.
+            // Explicit downloads are written to this cache via cache.put() in
+            // the download flow. This route serves those entries while the
+            // device is offline. cacheWillUpdate rejects every response so
+            // ordinary online playback (which shares these stream URLs) can
+            // never pollute the explicit-download cache.
             urlPattern: ({ url }) => url.pathname.includes('/Audio/') || url.pathname.endsWith('/rest/stream.view'),
             handler: 'CacheFirst',
-            options: { cacheName: 'lm-music-media-v1', expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 90 } },
+            options: {
+              cacheName: 'lm-music-media-v1',
+              expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 90 },
+              plugins: [{
+                // Returning null (not a Response) tells workbox to discard
+                // the fetched response instead of caching it.
+                cacheWillUpdate: async () => null,
+              }],
+            },
           },
         ],
       },
